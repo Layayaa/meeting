@@ -1,0 +1,64 @@
+<!-- pages/admin/admin.wxml -->
+<view class="page">
+  <!-- Hero -->
+  <view class="hero">
+    <view class="hero-icon">⚙️</view>
+    <text class="hero-title">管理员控制台</text>
+    <text class="hero-sub">管理用户、预约与活动</text>
+  </view>
+
+  <!-- Menu List -->
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goUserManage">
+      <view class="menu-left">
+        <view class="menu-icon-wrap blue">
+          <text class="menu-emoji">👥</text>
+        </view>
+        <view class="menu-text-wrap">
+          <text class="menu-label">用户管理</text>
+          <text class="menu-desc">添加用户、调整次数、禁用账号</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goReservationManage">
+      <view class="menu-left">
+        <view class="menu-icon-wrap purple">
+          <text class="menu-emoji">📋</text>
+        </view>
+        <view class="menu-text-wrap">
+          <text class="menu-label">预约管理</text>
+          <text class="menu-desc">查看所有预约、强制取消</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goActivityManage">
+      <view class="menu-left">
+        <view class="menu-icon-wrap green">
+          <text class="menu-emoji">🎉</text>
+        </view>
+        <view class="menu-text-wrap">
+          <text class="menu-label">活动管理</text>
+          <text class="menu-desc">发布、编辑、删除活动</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goSettings">
+      <view class="menu-left">
+        <view class="menu-icon-wrap orange">
+          <text class="menu-emoji">🔧</text>
+        </view>
+        <view class="menu-text-wrap">
+          <text class="menu-label">次数规则设置</text>
+          <text class="menu-desc">配置每周预约次数</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+</view>

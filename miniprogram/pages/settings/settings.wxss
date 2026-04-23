@@ -1,0 +1,120 @@
+/* pages/settings/settings.wxss */
+page {
+  background: #f0f2f7;
+  min-height: 100vh;
+}
+
+.page {
+  padding: 0 24rpx 60rpx;
+}
+
+.section-title-row {
+  padding: 24rpx 0 14rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+}
+
+.setting-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.setting-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.setting-desc {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.count-input {
+  width: 100rpx;
+  height: 64rpx;
+  background: #eff6ff;
+  border: 2rpx solid #bfdbfe;
+  border-radius: 10rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2563eb;
+  box-sizing: border-box;
+}
+
+.setting-fixed {
+  font-size: 26rpx;
+  color: #6b7280;
+}
+
+.divider {
+  height: 1rpx;
+  background: #f3f4f6;
+}
+
+.save-btn {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-top: 24rpx;
+  border: none;
+}
+
+/* Danger Zone */
+.danger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.danger-label {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.danger-desc {
+  display: block;
+  font-size: 22rpx;
+  color: #9ca3af;
+  margin-top: 4rpx;
+}
+
+.reset-btn {
+  flex-shrink: 0;
+  height: 68rpx;
+  padding: 0 28rpx;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  border: none;
+}

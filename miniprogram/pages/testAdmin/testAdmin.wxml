@@ -1,0 +1,22 @@
+<!-- pages/testAdmin/testAdmin.wxml -->
+<view class="container">
+  <view class="header">
+    <text class="title">管理员权限测试</text>
+  </view>
+
+  <view class="info">
+    <text>绑定状态: {{isBound ? '已绑定' : '未绑定'}}</text>
+  </view>
+
+  <view class="info">
+    <text>管理员权限: {{isAdmin ? '是' : '否'}}</text>
+  </view>
+
+  <view wx:if="{{userInfo}}" class="info">
+    <text>手机号: {{userInfo.phone}}</text>
+  </view>
+
+  <button wx:if="{{!isBound}}" class="btn" bindtap="goBind">去绑定手机号</button>
+  <button wx:if="{{isBound && !isAdmin}}" class="btn" bindtap="checkAdmin">检查管理员权限</button>
+  <button wx:if="{{isAdmin}}" class="btn success" bindtap="goAdmin">进入管理员页面</button>
+</view>

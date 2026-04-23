@@ -1,0 +1,107 @@
+<!-- pages/reserve/reserve.wxml -->
+<view class="page">
+  <!-- Header Quota Bar -->
+  <view class="quota-bar {{remainingCount <= 0 ? 'quota-empty' : ''}}">
+    <view class="quota-left">
+      <text class="quota-label">本周剩余预约</text>
+      <view wx:if="{{!isBound}}" class="quota-warn-text">请先登录</view>
+      <view wx:elif="{{userStatus === 'disabled'}}" class="quota-warn-text">账户已禁用</view>
+    </view>
+    <view class="quota-right">
+      <text class="quota-num {{remainingCount <= 0 ? 'zero' : ''}}">{{remainingCount}}</text>
+      <text class="quota-unit">次</text>
+    </view>
+  </view>
+
+  <!-- Date Selection -->
+  <view class="card">
+    <view class="card-title">
+      <text class="title-dot"></text>
+      <text>选择日期</text>
+    </view>
+    <scroll-view scroll-x class="date-scroll">
+      <view
+        wx:for="{{dates}}"
+        wx:key="date"
+        class="date-chip {{selectedDate === item.date ? 'active' : ''}}"
+        data-date="{{item.date}}"
+        bindtap="selectDate"
+      >
+        <text class="date-chip-main">{{item.dayLabel}}</text>
+        <text class="date-chip-sub">{{item.monthDay}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Room Selection -->
+  <view class="card">
+    <view class="card-title">
+      <text class="title-dot"></text>
+      <text>选择会议室</text>
+    </view>
+    <view class="room-row">
+      <view
+        wx:for="{{rooms}}"
+        wx:key="*this"
+        class="room-chip {{selectedRoom === item ? 'active' : ''}}"
+        data-room="{{item}}"
+        bindtap="selectRoom"
+      >
+        <view class="room-radio {{selectedRoom === item ? 'checked' : ''}}"></view>
+        <text class="room-chip-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Time Slots -->
+  <view wx:if="{{selectedRoom}}" class="card">
+    <view class="card-title">
+      <text class="title-dot"></text>
+      <text>选择时段</text>
+    </view>
+    <view class="slot-list">
+      <view
+        wx:for="{{timeSlotViews}}"
+        wx:key="slot"
+        class="slot-item {{item.className}}"
+        data-timeslot="{{item.slot}}"
+        bindtap="selectTimeSlot"
+      >
+        <view class="slot-time">{{item.slot}}</view>
+        <view class="slot-status">
+          <text wx:if="{{item.isFull}}" class="slot-tag busy">已约满</text>
+          <text wx:elif="{{item.isReserved}}" class="slot-tag reserved">{{item.reserverName}}</text>
+          <text wx:elif="{{item.isExpired}}" class="slot-tag expired">已过期</text>
+          <text wx:elif="{{item.isSelected}}" class="slot-check">✓</text>
+          <text wx:else class="slot-tag free">空闲</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Purpose Input -->
+  <view wx:if="{{selectedTimeSlot}}" class="card">
+    <view class="card-title">
+      <text class="title-dot"></text>
+      <text>预约用途 </text><text class="optional">（可选）</text>
+    </view>
+    <textarea
+      class="purpose-input"
+      placeholder="请输入预约用途，如：部门会议、面试..."
+      value="{{purpose}}"
+      bindinput="inputPurpose"
+      maxlength="100"
+    ></textarea>
+    <text class="char-count">{{purposeLength}}/100</text>
+  </view>
+
+  <!-- Confirm Button -->
+  <view wx:if="{{selectedTimeSlot}}" class="btn-wrap">
+    <view wx:if="{{reserveBlockReason}}" class="block-tip">{{reserveBlockReason}}</view>
+    <button
+      class="confirm-btn"
+      bindtap="confirmReserve"
+      disabled="{{!isBound || userStatus !== 'active' || remainingCount <= 0}}"
+    >确认预约</button>
+  </view>
+</view>

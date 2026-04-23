@@ -1,0 +1,12 @@
+{
+  "name": "checkBindStatus",
+  "version": "1.0.0",
+  "description": "检查用户绑定状态",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

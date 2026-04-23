@@ -1,0 +1,12 @@
+{
+  "name": "reserveRoom",
+  "version": "1.0.0",
+  "description": "预约会议室",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

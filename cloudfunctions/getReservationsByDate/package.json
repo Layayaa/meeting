@@ -1,0 +1,12 @@
+{
+  "name": "getReservationsByDate",
+  "version": "1.0.0",
+  "description": "获取指定日期的预约",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

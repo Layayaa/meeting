@@ -1,0 +1,176 @@
+/* pages/reservationManage/reservationManage.wxss */
+page {
+  background: #f0f2f7;
+  min-height: 100vh;
+}
+
+.page {
+  padding: 0 24rpx 60rpx;
+}
+
+/* Filter Card */
+.filter-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 20rpx 0 0;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.filter-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 20rpx;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.filter-label {
+  font-size: 22rpx;
+  color: #6b7280;
+}
+
+.filter-input {
+  height: 68rpx;
+  background: #f9fafb;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 10rpx;
+  padding: 0 14rpx;
+  font-size: 24rpx;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+.search-btn {
+  width: 100%;
+  height: 76rpx;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-radius: 38rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  border: none;
+}
+
+/* Section */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0 14rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx;
+}
+
+.empty-icon {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* Reserve Card */
+.reserve-card {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.card-top {
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.user-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.status-badge {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.status-badge.pending { background: #eff6ff; color: #2563eb; }
+.status-badge.completed { background: #f0fdf4; color: #059669; }
+.status-badge.cancelled { background: #f9fafb; color: #9ca3af; }
+
+.card-body {
+  padding: 16rpx 24rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.info-icon {
+  font-size: 24rpx;
+  width: 30rpx;
+}
+
+.info-text {
+  font-size: 26rpx;
+  color: #6b7280;
+}
+
+.card-footer {
+  padding: 16rpx 24rpx;
+  border-top: 1rpx solid #f3f4f6;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  height: 60rpx;
+  padding: 0 24rpx;
+  border: none;
+}

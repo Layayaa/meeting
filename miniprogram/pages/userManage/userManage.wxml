@@ -1,0 +1,112 @@
+<!-- pages/userManage/userManage.wxml -->
+<view class="page">
+  <!-- Add User Card -->
+  <view class="section-title-row">
+    <text class="section-title">添加用户</text>
+  </view>
+  <view class="form-card">
+    <view class="input-group">
+      <text class="input-label">手机号</text>
+      <input
+        class="input"
+        type="number"
+        maxlength="11"
+        placeholder="请输入手机号"
+        value="{{newUserPhone}}"
+        data-key="newUserPhone"
+        bindinput="bindNewUserInput"
+      />
+    </view>
+    <view class="input-group">
+      <text class="input-label">姓名</text>
+      <input
+        class="input"
+        placeholder="请输入姓名"
+        value="{{newUserName}}"
+        data-key="newUserName"
+        bindinput="bindNewUserInput"
+      />
+    </view>
+    <view class="input-group">
+      <text class="input-label">部门 <text class="optional">（可选）</text></text>
+      <input
+        class="input"
+        placeholder="请输入部门"
+        value="{{newUserDepartment}}"
+        data-key="newUserDepartment"
+        bindinput="bindNewUserInput"
+      />
+    </view>
+    <button class="add-btn" bindtap="addUser">+ 添加用户</button>
+  </view>
+
+  <!-- User List -->
+  <view class="section-title-row">
+    <text class="section-title">用户列表</text>
+    <text class="section-count">共 {{users.length}} 人</text>
+  </view>
+
+  <view wx:if="{{!users.length}}" class="empty-state">
+    <text class="empty-icon">👥</text>
+    <text class="empty-text">暂无用户</text>
+  </view>
+
+  <view wx:for="{{users}}" wx:key="_id" class="user-card">
+    <!-- User Header -->
+    <view class="user-header">
+      <view class="user-avatar">
+        <text>{{item.avatarChar}}</text>
+      </view>
+      <view class="user-info">
+        <view class="user-name-row">
+          <text class="user-name">{{item.name}}</text>
+          <view class="user-dept" wx:if="{{item.department}}">{{item.department}}</view>
+        </view>
+        <text class="user-phone">{{item.phone}}</text>
+      </view>
+      <view class="status-dot {{item.status === 'active' ? 'active' : 'disabled'}}"></view>
+    </view>
+
+    <!-- Stats Row -->
+    <view class="user-stats">
+      <view class="stat-cell">
+        <text class="stat-val">{{item.remainingCount}}</text>
+        <text class="stat-key">剩余</text>
+      </view>
+      <view class="stat-cell">
+        <text class="stat-val">{{item.extra_count || 0}}</text>
+        <text class="stat-key">额外</text>
+      </view>
+      <view class="stat-cell">
+        <text class="stat-val">{{item.used_count || 0}}</text>
+        <text class="stat-key">已用</text>
+      </view>
+      <view class="stat-cell">
+        <text class="stat-val">{{item.weeklyDefault || 0}}</text>
+        <text class="stat-key">默认/周</text>
+      </view>
+    </view>
+
+    <!-- Actions -->
+    <view class="user-actions">
+      <view class="dispatch-row">
+        <input
+          class="dispatch-input"
+          type="number"
+          placeholder="派发次数"
+          data-userid="{{item._id}}"
+          data-index="{{index}}"
+          bindinput="bindExtraInput"
+          value="{{item.extraInput || ''}}"
+        />
+        <button class="dispatch-btn" data-userid="{{item._id}}" bindtap="saveExtraCount">派发</button>
+      </view>
+      <button
+        class="toggle-btn {{item.status === 'active' ? 'disable' : 'enable'}}"
+        data-userid="{{item._id}}"
+        data-status="{{item.status === 'active' ? 'disabled' : 'active'}}"
+        bindtap="toggleStatus"
+      >{{item.status === 'active' ? '禁用账号' : '启用账号'}}</button>
+    </view>
+  </view>
+</view>

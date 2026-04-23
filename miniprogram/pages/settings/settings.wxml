@@ -1,0 +1,44 @@
+<!-- pages/settings/settings.wxml -->
+<view class="page">
+  <!-- Global Rules -->
+  <view class="section-title-row">
+    <text class="section-title">全局规则</text>
+  </view>
+  <view class="card">
+    <view class="setting-item">
+      <view class="setting-left">
+        <text class="setting-label">每周可预约次数</text>
+        <text class="setting-desc">每位用户每周的默认预约配额</text>
+      </view>
+      <input
+        class="count-input"
+        type="number"
+        value="{{weekly_default}}"
+        bindinput="bindDefaultChange"
+      />
+    </view>
+    <view class="divider"></view>
+    <view class="setting-item no-border">
+      <view class="setting-left">
+        <text class="setting-label">重置时间</text>
+        <text class="setting-desc">固定不可修改</text>
+      </view>
+      <text class="setting-fixed">每周六 22:00</text>
+    </view>
+    <button class="save-btn" bindtap="saveSettings">保存设置</button>
+  </view>
+
+  <!-- Danger Zone -->
+  <view class="section-title-row">
+    <text class="section-title">操作</text>
+  </view>
+  <view class="card">
+    <view class="danger-item">
+      <view>
+        <text class="danger-label">立即重置本周次数</text>
+        <text class="danger-desc">将所有用户本周次数重置为默认值</text>
+      </view>
+      <button class="reset-btn" bindtap="refreshWeeklyCounts">立即重置</button>
+    </view>
+  </view>
+</view>

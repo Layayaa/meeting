@@ -1,0 +1,65 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/login",
+    "pages/reserve/reserve",
+    "pages/myReservations/myReservations",
+    "pages/activities/activities",
+    "pages/admin/admin",
+    "pages/userManage/userManage",
+    "pages/reservationManage/reservationManage",
+    "pages/activityManage/activityManage",
+    "pages/settings/settings",
+    "pages/initDatabase/initDatabase",
+    "pages/testAdmin/testAdmin",
+    "pages/example/index"
+  ],
+  "window": {
+    "backgroundColor": "#f0f2f7",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "会议室预约系统",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userInfo": {
+      "desc": "用于获取用户基本信息"
+    }
+  },
+  "requiredBackgroundModes": [],
+  "tabBar": {
+    "color": "#666666",
+    "selectedColor": "#007aff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/icons/home.png",
+        "selectedIconPath": "images/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/reserve/reserve",
+        "text": "预约",
+        "iconPath": "images/icons/reserve.png",
+        "selectedIconPath": "images/icons/reserve.png"
+      },
+      {
+        "pagePath": "pages/myReservations/myReservations",
+        "text": "我的",
+        "iconPath": "images/icons/usercenter.png",
+        "selectedIconPath": "images/icons/usercenter-active.png"
+      },
+      {
+        "pagePath": "pages/activities/activities",
+        "text": "活动",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
+      }
+    ]
+  }
+}

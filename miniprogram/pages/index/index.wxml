@@ -1,0 +1,106 @@
+<!-- pages/index/index.wxml -->
+<view class="page">
+  <!-- Hero Banner -->
+  <view class="hero">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <view class="hero-top">
+        <view class="hero-greeting">
+          <text class="hero-hello">你好 👋</text>
+          <text class="hero-name">{{displayName || '访客'}}</text>
+        </view>
+        <view wx:if="{{isAdmin}}" class="admin-badge">管理员</view>
+      </view>
+      <view class="hero-dept" wx:if="{{userInfo.department}}">
+        <text>{{userInfo.department}}</text>
+      </view>
+      <view class="hero-stats" wx:if="{{isBound && userStatus === 'active'}}">
+        <view class="stat-item">
+          <text class="stat-num">{{remainingCount}}</text>
+          <text class="stat-label">本周剩余</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-num">{{userInfo.extra_count || 0}}</text>
+          <text class="stat-label">额外派发</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Status Alert -->
+  <view wx:if="{{!isBound}}" class="alert alert-warn">
+    <view class="alert-icon">⚠️</view>
+    <view class="alert-body">
+      <text class="alert-title">未绑定账号</text>
+      <text class="alert-desc">请登录或注册后使用预约功能</text>
+    </view>
+  </view>
+  <view wx:if="{{isBound && userStatus === 'disabled'}}" class="alert alert-danger">
+    <view class="alert-icon">🚫</view>
+    <view class="alert-body">
+      <text class="alert-title">账户已禁用</text>
+      <text class="alert-desc">请联系管理员处理</text>
+    </view>
+  </view>
+
+  <!-- Quick Actions -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">快捷入口</text>
+    </view>
+    <view class="quick-grid">
+      <view class="quick-item {{!isBound || userStatus === 'disabled' ? 'disabled' : ''}}" bindtap="goReserve">
+        <view class="quick-icon-wrap blue">
+          <image class="quick-icon" src="../../images/icons/reserve.png" mode="aspectFit"></image>
+        </view>
+        <text class="quick-label">预约会议室</text>
+      </view>
+      <view class="quick-item" bindtap="goMyReservations">
+        <view class="quick-icon-wrap purple">
+          <image class="quick-icon" src="../../images/icons/my.png" mode="aspectFit"></image>
+        </view>
+        <text class="quick-label">我的预约</text>
+      </view>
+      <view class="quick-item" bindtap="goActivities">
+        <view class="quick-icon-wrap green">
+          <image class="quick-icon" src="../../images/icons/examples.png" mode="aspectFit"></image>
+        </view>
+        <text class="quick-label">活动列表</text>
+      </view>
+      <view wx:if="{{isAdmin}}" class="quick-item" bindtap="goAdmin">
+        <view class="quick-icon-wrap orange">
+          <image class="quick-icon" src="../../images/icons/admin.png" mode="aspectFit"></image>
+        </view>
+        <text class="quick-label">管理后台</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Today's Rooms -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">今日会议室</text>
+      <text class="section-date">{{todayDisplay}}</text>
+    </view>
+    <view class="room-card">
+      <view
+        wx:for="{{todayRooms}}"
+        wx:key="room"
+        class="room-row {{index < todayRooms.length - 1 ? 'has-divider' : ''}}"
+        data-room="{{item.room}}"
+        bindtap="goReserveWithRoom"
+      >
+        <view class="room-info">
+          <view class="room-dot {{item.isFree ? 'free' : 'busy'}}"></view>
+          <text class="room-name">{{item.room}}</text>
+        </view>
+        <view class="room-status">
+          <text wx:if="{{item.isFree}}" class="status-free">空闲</text>
+          <text wx:else class="status-busy">{{item.statusText}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

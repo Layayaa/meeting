@@ -1,0 +1,12 @@
+{
+  "name": "getUserStatus",
+  "version": "1.0.0",
+  "description": "获取用户状态",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

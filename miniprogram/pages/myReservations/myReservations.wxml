@@ -1,0 +1,82 @@
+<!-- pages/myReservations/myReservations.wxml -->
+<view class="page">
+  <!-- Unauthenticated -->
+  <view wx:if="{{!isBound}}" class="auth-state">
+    <view class="auth-emoji">🔒</view>
+    <text class="auth-title">请先登录</text>
+    <text class="auth-desc">登录后可查看和管理你的预约记录</text>
+    <button class="auth-btn" bindtap="goLogin">去登录 / 注册</button>
+  </view>
+
+  <!-- Disabled -->
+  <view wx:elif="{{userStatus === 'disabled'}}" class="auth-state">
+    <view class="auth-emoji">🚫</view>
+    <text class="auth-title">账户已被禁用</text>
+    <text class="auth-desc">请联系管理员处理后再使用</text>
+  </view>
+
+  <!-- Authenticated -->
+  <view wx:else>
+    <!-- Profile Card -->
+    <view class="profile-card">
+      <view class="avatar-wrap">
+        <text class="avatar-text">{{avatarChar}}</text>
+      </view>
+      <view class="profile-info">
+        <text class="profile-name">{{userInfo.name || '用户'}}</text>
+        <text class="profile-dept" wx:if="{{userInfo.department}}">{{userInfo.department}}</text>
+        <text class="profile-phone">{{userInfo.maskedPhone || userInfo.phone}}</text>
+      </view>
+    </view>
+
+    <!-- Stats -->
+    <view class="stats-card">
+      <view class="stats-row">
+        <view class="stats-item">
+          <text class="stats-num">{{remainingCount}}</text>
+          <text class="stats-label">本周剩余</text>
+        </view>
+        <view class="stats-divider"></view>
+        <view class="stats-item">
+          <text class="stats-num">{{userInfo.extra_count || 0}}</text>
+          <text class="stats-label">额外派发</text>
+        </view>
+        <view class="stats-divider"></view>
+        <view class="stats-item">
+          <text class="stats-num">{{userInfo.used_count || 0}}</text>
+          <text class="stats-label">已使用</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Reservation List -->
+    <view class="section-title-row">
+      <text class="section-title">我的预约</text>
+    </view>
+
+    <view wx:if="{{!reservations.length}}" class="list-empty">
+      <text class="list-empty-icon">📅</text>
+      <text class="list-empty-text">暂无预约记录</text>
+    </view>
+
+    <view wx:for="{{reservations}}" wx:key="_id" class="reserve-card">
+      <view class="reserve-top">
+        <view class="reserve-room">{{item.room}}</view>
+        <view class="status-badge {{item.status}}">{{item.statusText}}</view>
+      </view>
+      <view class="reserve-meta">
+        <text class="meta-item">📅 {{item.date}}</text>
+        <text class="meta-item">⏰ {{item.time_slot}}</text>
+      </view>
+      <view wx:if="{{item.purpose}}" class="reserve-purpose">
+        <text>用途：{{item.purpose}}</text>
+      </view>
+      <view class="reserve-bottom" wx:if="{{item.status === 'pending'}}">
+        <view wx:if="{{item.canCancel}}" class="cancel-wrap">
+          <button class="cancel-btn" data-id="{{item._id}}" bindtap="cancelReservation">取消预约</button>
+        </view>
+        <text wx:else class="cancel-expired">已过取消时限</text>
+      </view>
+    </view>
+  </view>
+</view>

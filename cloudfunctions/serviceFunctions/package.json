@@ -1,0 +1,10 @@
+{
+  "name": "serviceFunctions",
+  "version": "1.0.0",
+  "description": "通用后台服务函数",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

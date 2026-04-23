@@ -1,0 +1,50 @@
+<!-- pages/activityManage/activityManage.wxml -->
+<view class="page">
+  <!-- Form Card -->
+  <view class="section-title-row">
+    <text class="section-title">{{editingId ? '编辑活动' : '发布活动'}}</text>
+  </view>
+  <view class="form-card">
+    <view class="input-group">
+      <text class="input-label">活动标题</text>
+      <input class="input" data-key="title" value="{{title}}" bindinput="bindValue" placeholder="请输入活动标题" />
+    </view>
+    <view class="input-group">
+      <text class="input-label">活动时间</text>
+      <input class="input" data-key="time" value="{{time}}" bindinput="bindValue" placeholder="例：2024-06-15 14:00" />
+    </view>
+    <view class="input-group">
+      <text class="input-label">活动描述</text>
+      <input class="input" data-key="description" value="{{description}}" bindinput="bindValue" placeholder="请输入活动描述" />
+    </view>
+    <view class="input-group">
+      <text class="input-label">飞书二维码链接</text>
+      <input class="input" data-key="qr_code_url" value="{{qr_code_url}}" bindinput="bindValue" placeholder="输入链接或下方上传图片" />
+      <button class="upload-btn" bindtap="chooseQrImage">📷 上传二维码图片</button>
+    </view>
+    <button class="save-btn" bindtap="saveActivity">{{editingId ? '保存修改' : '发布活动'}}</button>
+  </view>
+
+  <!-- Activity List -->
+  <view class="section-title-row">
+    <text class="section-title">已发布活动</text>
+    <text class="section-count" wx:if="{{activities.length}}">共 {{activities.length}} 条</text>
+  </view>
+
+  <view wx:if="{{!activities.length}}" class="empty-state">
+    <text class="empty-icon">🎉</text>
+    <text class="empty-text">暂无活动</text>
+  </view>
+
+  <view wx:for="{{activities}}" wx:key="_id" class="activity-card">
+    <view class="card-header">
+      <text class="activity-title">{{item.title}}</text>
+      <text class="activity-time">{{item.time}}</text>
+    </view>
+    <text class="activity-desc" wx:if="{{item.description}}">{{item.description}}</text>
+    <view class="card-actions">
+      <button class="edit-btn" data-item="{{item}}" bindtap="editActivity">编辑</button>
+      <button class="delete-btn" data-id="{{item._id}}" bindtap="deleteActivity">删除</button>
+    </view>
+  </view>
+</view>

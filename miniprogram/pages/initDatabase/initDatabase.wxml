@@ -1,0 +1,19 @@
+<!-- pages/initDatabase/initDatabase.wxml -->
+<view class="page">
+  <view class="header">
+    <text class="title">数据库初始化</text>
+  </view>
+
+  <view class="content">
+    <text class="desc">点击下方按钮初始化数据库集合和默认设置</text>
+
+    <view class="result" wx:if="{{result}}">
+      <text class="result-title">初始化结果：</text>
+      <view class="result-list">
+        <text wx:for="{{result.results}}" wx:key="{{index}}" class="result-item">{{item}}</text>
+      </view>
+    </view>
+
+    <button class="action-btn" bindtap="initDatabase" loading="{{loading}}">初始化数据库</button>
+  </view>
+</view>

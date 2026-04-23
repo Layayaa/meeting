@@ -1,0 +1,12 @@
+{
+  "name": "bindPhone",
+  "version": "1.0.0",
+  "description": "绑定手机号",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

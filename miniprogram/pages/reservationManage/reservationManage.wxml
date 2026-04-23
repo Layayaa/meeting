@@ -1,0 +1,63 @@
+<!-- pages/reservationManage/reservationManage.wxml -->
+<view class="page">
+  <!-- Filter Card -->
+  <view class="filter-card">
+    <view class="filter-title">筛选条件</view>
+    <view class="filter-grid">
+      <view class="filter-item">
+        <text class="filter-label">开始日期</text>
+        <input class="filter-input" placeholder="YYYY-MM-DD" bindinput="bindDateFromChange" value="{{filterDateFrom}}" />
+      </view>
+      <view class="filter-item">
+        <text class="filter-label">结束日期</text>
+        <input class="filter-input" placeholder="YYYY-MM-DD" bindinput="bindDateToChange" value="{{filterDateTo}}" />
+      </view>
+      <view class="filter-item">
+        <text class="filter-label">会议室</text>
+        <input class="filter-input" placeholder="全部会议室" bindinput="bindRoomChange" value="{{filterRoom}}" />
+      </view>
+      <view class="filter-item">
+        <text class="filter-label">预约人</text>
+        <input class="filter-input" placeholder="输入姓名" bindinput="bindUserNameChange" value="{{filterUserName}}" />
+      </view>
+    </view>
+    <button class="search-btn" bindtap="search">🔍 搜索预约</button>
+  </view>
+
+  <!-- Results -->
+  <view class="section-title-row">
+    <text class="section-title">预约记录</text>
+    <text class="section-count" wx:if="{{reservations.length}}">共 {{reservations.length}} 条</text>
+  </view>
+
+  <view wx:if="{{!reservations.length}}" class="empty-state">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无预约记录</text>
+  </view>
+
+  <view wx:for="{{reservations}}" wx:key="_id" class="reserve-card">
+    <view class="card-top">
+      <view class="user-info-row">
+        <text class="user-name">{{item.user_name}}</text>
+        <view class="status-badge {{item.status}}">{{item.statusText}}</view>
+      </view>
+    </view>
+    <view class="card-body">
+      <view class="info-row">
+        <text class="info-icon">🏢</text>
+        <text class="info-text">{{item.room}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-icon">📅</text>
+        <text class="info-text">{{item.date}} &nbsp; {{item.time_slot}}</text>
+      </view>
+      <view class="info-row" wx:if="{{item.purpose}}">
+        <text class="info-icon">📝</text>
+        <text class="info-text">{{item.purpose}}</text>
+      </view>
+    </view>
+    <view wx:if="{{item.status === 'pending'}}" class="card-footer">
+      <button class="cancel-btn" data-id="{{item._id}}" bindtap="forceCancel">强制取消</button>
+    </view>
+  </view>
+</view>

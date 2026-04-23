@@ -1,0 +1,163 @@
+/* pages/activityManage/activityManage.wxss */
+page {
+  background: #f0f2f7;
+  min-height: 100vh;
+}
+
+.page {
+  padding: 0 24rpx 60rpx;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0 14rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+/* Form */
+.form-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.input-group {
+  margin-bottom: 22rpx;
+}
+
+.input-label {
+  display: block;
+  font-size: 26rpx;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.input {
+  width: 100%;
+  height: 80rpx;
+  background: #f9fafb;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  font-size: 26rpx;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+.upload-btn {
+  margin-top: 10rpx;
+  background: #f0fdf4;
+  color: #059669;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  height: 68rpx;
+  border: none;
+}
+
+.save-btn {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-top: 8rpx;
+  border: none;
+}
+
+/* Empty */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx;
+}
+
+.empty-icon {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* Activity Cards */
+.activity-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.card-header {
+  margin-bottom: 12rpx;
+}
+
+.activity-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.activity-time {
+  display: block;
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-top: 6rpx;
+}
+
+.activity-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f3f4f6;
+}
+
+.edit-btn {
+  flex: 1;
+  height: 68rpx;
+  background: #eff6ff;
+  color: #2563eb;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  border: none;
+}
+
+.delete-btn {
+  flex: 1;
+  height: 68rpx;
+  background: #fef2f2;
+  color: #ef4444;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  border: none;
+}

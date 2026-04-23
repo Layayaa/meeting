@@ -1,0 +1,44 @@
+/* pages/testAdmin/testAdmin.wxss */
+.container {
+  padding: 40rpx;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.info {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+}
+
+.info text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.btn {
+  margin-top: 40rpx;
+  background: #007aff;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 0 40rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  width: 100%;
+}
+
+.btn.success {
+  background: #07c160;
+}

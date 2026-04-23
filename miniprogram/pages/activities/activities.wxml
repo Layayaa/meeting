@@ -1,0 +1,47 @@
+<!-- pages/activities/activities.wxml -->
+<view class="page">
+  <!-- Empty State -->
+  <view wx:if="{{!activities.length}}" class="empty-state">
+    <view class="empty-icon">🎉</view>
+    <text class="empty-title">暂无活动</text>
+    <text class="empty-desc">敬请期待后续活动</text>
+  </view>
+
+  <!-- Activity Cards -->
+  <view wx:for="{{activities}}" wx:key="_id" class="activity-card">
+    <view class="card-header">
+      <view class="card-tag">活动</view>
+      <text class="activity-title">{{item.title}}</text>
+    </view>
+
+    <view class="meta-row" wx:if="{{item.time}}">
+      <text class="meta-icon">🕐</text>
+      <text class="meta-text">{{item.time}}</text>
+    </view>
+    <view class="meta-row" wx:if="{{item.location}}">
+      <text class="meta-icon">📍</text>
+      <text class="meta-text">{{item.location}}</text>
+    </view>
+    <view wx:if="{{item.description}}" class="desc-text">{{item.description}}</view>
+
+    <!-- QR Code -->
+    <view wx:if="{{item.qr_code_url}}" class="qr-wrap">
+      <image
+        class="qr-image"
+        src="{{item.qr_code_url}}"
+        mode="aspectFit"
+        show-menu-by-longpress="true"
+      ></image>
+      <text class="qr-hint">长按保存二维码，扫码加入群聊</text>
+    </view>
+
+    <view wx:if="{{item.qr_code_url}}" class="card-actions">
+      <button class="action-btn primary" data-url="{{item.qr_code_url}}" bindtap="openQr">
+        查看二维码
+      </button>
+      <button class="action-btn secondary" data-url="{{item.qr_code_url}}" bindtap="openLink">
+        复制链接
+      </button>
+    </view>
+  </view>
+</view>
