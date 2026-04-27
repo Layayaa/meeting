@@ -1,0 +1,11 @@
+﻿page { background: #f3f4f6; }
+.page { padding: 20rpx; }
+.empty { text-align: center; color: #9ca3af; padding: 60rpx 0; }
+.submit { margin-top: 18rpx; background: #2563eb; color: #fff; border-radius: 10rpx; border: none; }
+.card { background: #fff; border-radius: 14rpx; padding: 20rpx; margin-bottom: 12rpx; }
+.content { display: block; font-size: 28rpx; color: #111827; line-height: 1.5; }
+.meta-row { margin-top: 10rpx; display: flex; align-items: center; justify-content: space-between; }
+.time { font-size: 22rpx; color: #9ca3af; }
+.status { font-size: 22rpx; padding: 4rpx 14rpx; border-radius: 14rpx; }
+.status.pending { background: #fff7ed; color: #c2410c; }
+.status.replied { background: #ecfdf5; color: #059669; }

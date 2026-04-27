@@ -1,0 +1,32 @@
+﻿<view class="page">
+  <view class="top-actions">
+    <button class="create" bindtap="createNotice">+ 新建通知</button>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{status==='all'?'active':''}}" data-status="all" bindtap="selectStatus">全部</view>
+    <view class="tab {{status==='draft'?'active':''}}" data-status="draft" bindtap="selectStatus">草稿</view>
+    <view class="tab {{status==='published'?'active':''}}" data-status="published" bindtap="selectStatus">已发布</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+
+  <block wx:elif="{{!displayList.length}}">
+    <view class="empty">暂无通知</view>
+  </block>
+
+  <view wx:for="{{displayList}}" wx:key="_id" class="card">
+    <view class="title-row">
+      <text class="title">{{item.title}}</text>
+      <view class="tags">
+        <text wx:if="{{item.is_pinned}}" class="tag pin">置顶</text>
+        <text class="tag status {{item.status}}">{{item.status === 'published' ? '已发布' : '草稿'}}</text>
+      </view>
+    </view>
+    <text class="time">{{item.published_at || item.created_at}}</text>
+    <view class="actions">
+      <button class="edit" data-id="{{item._id}}" bindtap="editNotice">编辑</button>
+      <button class="del" data-id="{{item._id}}" bindtap="deleteNotice">删除</button>
+    </view>
+  </view>
+</view>

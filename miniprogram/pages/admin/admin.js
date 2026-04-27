@@ -13,6 +13,13 @@ Page({
   goActivityManage() {
     wx.navigateTo({ url: '/pages/activityManage/activityManage' })
   },
+  goFeedbackManage() {
+    wx.navigateTo({ url: '/pages/feedbackManage/feedbackManage' })
+  },
+
+  goNoticeManage() {
+    wx.navigateTo({ url: '/pages/noticeManage/noticeManage' })
+  },
 
   goSettings() {
     wx.navigateTo({ url: '/pages/settings/settings' })

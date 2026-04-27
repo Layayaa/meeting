@@ -1,0 +1,27 @@
+﻿<view class="page">
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+
+  <view wx:elif="{{!detail}}" class="empty">反馈不存在</view>
+
+  <view wx:else>
+    <view class="card">
+      <text class="label">用户信息</text>
+      <text class="text">{{detail.user_name}} {{detail.user_phone}}</text>
+      <text class="text">提交时间：{{detail.created_at}}</text>
+    </view>
+
+    <view class="card">
+      <text class="label">反馈内容</text>
+      <text class="content">{{detail.content}}</text>
+      <view wx:if="{{detail.images && detail.images.length}}" class="img-grid">
+        <image wx:for="{{detail.images}}" wx:key="*this" class="img" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage"></image>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="label">管理员回复</text>
+      <textarea class="reply" maxlength="500" value="{{replyInput}}" bindinput="bindReply" placeholder="请输入回复内容"></textarea>
+      <button class="submit" bindtap="submitReply" loading="{{submitting}}">提交回复</button>
+    </view>
+  </view>
+</view>

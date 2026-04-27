@@ -77,6 +77,8 @@ page {
 .menu-icon-wrap.blue { background: #eff6ff; }
 .menu-icon-wrap.purple { background: #f5f3ff; }
 .menu-icon-wrap.green { background: #f0fdf4; }
+.menu-icon-wrap.yellow { background: #fffbeb; }
+.menu-icon-wrap.red { background: #fef2f2; }
 .menu-icon-wrap.orange { background: #fff7ed; }
 
 .menu-emoji {

@@ -1,0 +1,12 @@
+﻿page { background: #f3f4f6; }
+.page { padding: 20rpx; }
+.card { background: #fff; border-radius: 14rpx; padding: 20rpx; margin-bottom: 16rpx; }
+.textarea { width: 100%; height: 220rpx; font-size: 28rpx; color: #111827; }
+.count { display: block; text-align: right; color: #9ca3af; font-size: 22rpx; margin-top: 8rpx; }
+.img-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14rpx; }
+.choose { height: 58rpx; line-height: 58rpx; background: #eff6ff; color: #1d4ed8; border-radius: 10rpx; font-size: 24rpx; border: none; }
+.img-grid { display: flex; gap: 12rpx; flex-wrap: wrap; }
+.img-item { width: 180rpx; height: 180rpx; position: relative; }
+.img { width: 100%; height: 100%; border-radius: 10rpx; }
+.del { position: absolute; right: -10rpx; top: -10rpx; width: 34rpx; height: 34rpx; border-radius: 17rpx; background: #ef4444; color: #fff; text-align: center; line-height: 34rpx; font-size: 24rpx; }
+.submit { margin-top: 20rpx; height: 80rpx; line-height: 80rpx; border-radius: 40rpx; background: #2563eb; color: #fff; border: none; }

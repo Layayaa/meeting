@@ -5,10 +5,19 @@
     "pages/reserve/reserve",
     "pages/myReservations/myReservations",
     "pages/activities/activities",
+    "pages/notices/notices",
+    "pages/noticeDetail/noticeDetail",
+    "pages/feedbackSubmit/feedbackSubmit",
+    "pages/myFeedbacks/myFeedbacks",
+    "pages/feedbackDetail/feedbackDetail",
     "pages/admin/admin",
     "pages/userManage/userManage",
     "pages/reservationManage/reservationManage",
     "pages/activityManage/activityManage",
+    "pages/feedbackManage/feedbackManage",
+    "pages/feedbackReply/feedbackReply",
+    "pages/noticeManage/noticeManage",
+    "pages/noticeEdit/noticeEdit",
     "pages/settings/settings",
     "pages/initDatabase/initDatabase",
     "pages/testAdmin/testAdmin",
@@ -31,10 +40,10 @@
   },
   "requiredBackgroundModes": [],
   "tabBar": {
-    "color": "#666666",
-    "selectedColor": "#007aff",
+    "color": "#9ca3af",
+    "selectedColor": "#2563eb",
     "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",
@@ -56,7 +65,7 @@
       },
       {
         "pagePath": "pages/activities/activities",
-        "text": "活动",
+        "text": "活动列表",
         "iconPath": "images/icons/examples.png",
         "selectedIconPath": "images/icons/examples-active.png"
       }

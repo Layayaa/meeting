@@ -1,0 +1,11 @@
+﻿<view class="page">
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+
+  <view wx:elif="{{!notice}}" class="empty">通知不存在</view>
+
+  <view wx:else class="card">
+    <text class="title">{{notice.title}}</text>
+    <text class="time">发布时间：{{notice.published_at || notice.created_at}}</text>
+    <text class="content">{{notice.content}}</text>
+  </view>
+</view>

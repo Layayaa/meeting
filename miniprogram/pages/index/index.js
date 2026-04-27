@@ -7,6 +7,8 @@ Page({
     userStatus: 'inactive',
     userInfo: null,
     displayName: '用户',
+    noticePreview: null,
+    noticePreviewLoading: false,
     todayDisplay: '',
     todayRooms: [],
     rooms: ['会议室A', '会议室B', '会议室C']
@@ -14,14 +16,74 @@ Page({
 
   onLoad: function() {
     this.initTodayDisplay();
+    this.loadNoticePreview();
     this.loadRoomSettings();
     this.checkUserStatus();
   },
 
   onShow: function() {
     this.initTodayDisplay();
+    this.loadNoticePreview();
     this.loadRoomSettings();
     this.checkUserStatus();
+  },
+
+  formatPreviewTime(value) {
+    if (!value) return '';
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) {
+      const str = String(value);
+      return str.length > 16 ? str.slice(0, 16) : str;
+    }
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const d = String(dt.getDate()).padStart(2, '0');
+    const hh = String(dt.getHours()).padStart(2, '0');
+    const mm = String(dt.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}`;
+  },
+
+  loadNoticePreview: function() {
+    this.setData({
+      noticePreviewLoading: true
+    });
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: {
+        action: 'getNotices',
+        scope: 'user'
+      },
+      success: (res) => {
+        const result = (res && res.result) || {};
+        const list = Array.isArray(result.notices) ? result.notices : [];
+        const first = list[0];
+        if (!first) {
+          this.setData({
+            noticePreview: null,
+            noticePreviewLoading: false
+          });
+          return;
+        }
+        const content = String(first.content || '').replace(/\s+/g, ' ').trim();
+        this.setData({
+          noticePreview: {
+            _id: first._id,
+            title: first.title || '通知公告',
+            contentPreview: content.length > 52 ? `${content.slice(0, 52)}...` : content,
+            is_pinned: !!first.is_pinned,
+            timeText: this.formatPreviewTime(first.published_at || first.created_at)
+          },
+          noticePreviewLoading: false
+        });
+      },
+      fail: (err) => {
+        console.error('加载通知预览失败', err);
+        this.setData({
+          noticePreview: null,
+          noticePreviewLoading: false
+        });
+      }
+    });
   },
 
   loadRoomSettings: function() {
@@ -115,6 +177,10 @@ Page({
     });
   },
 
+  goLogin: function() {
+    wx.navigateTo({ url: '/pages/login/login' });
+  },
+
   goReserve: function() {
     if (!this.data.isBound || this.data.userStatus === 'disabled') {
       wx.showToast({ title: !this.data.isBound ? '请先登录' : '账户已被禁用', icon: 'none' });
@@ -133,6 +199,21 @@ Page({
 
   goActivities: function() {
     wx.switchTab({ url: '/pages/activities/activities' });
+  },
+
+  goNotices: function() {
+    wx.navigateTo({ url: '/pages/notices/notices' });
+  },
+
+  openNoticePreview: function() {
+    const item = this.data.noticePreview;
+    if (item && item._id) {
+      wx.navigateTo({
+        url: `/pages/noticeDetail/noticeDetail?id=${item._id}`
+      });
+      return;
+    }
+    this.goNotices();
   },
 
   goAdmin: function() {

@@ -1,0 +1,19 @@
+﻿<view class="page">
+  <view class="tabs">
+    <view class="tab {{status==='all'?'active':''}}" data-status="all" bindtap="selectStatus">全部</view>
+    <view class="tab {{status==='pending'?'active':''}}" data-status="pending" bindtap="selectStatus">待回复</view>
+    <view class="tab {{status==='replied'?'active':''}}" data-status="replied" bindtap="selectStatus">已回复</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+  <view wx:elif="{{!list.length}}" class="empty">暂无反馈记录</view>
+
+  <view wx:for="{{list}}" wx:key="_id" class="card" data-id="{{item._id}}" bindtap="openDetail">
+    <view class="top">
+      <text class="name">{{item.user_name}} {{item.user_phone}}</text>
+      <text class="status {{item.status}}">{{item.statusText}}</text>
+    </view>
+    <text class="content">{{item.content_summary}}{{item.content.length > 30 ? '...' : ''}}</text>
+    <text class="time">{{item.created_at}}</text>
+  </view>
+</view>

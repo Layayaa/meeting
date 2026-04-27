@@ -9,7 +9,7 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   try {
-    const collections = ['users', 'admins', 'reservations', 'activities', 'settings', 'operation_logs']
+    const collections = ['users', 'admins', 'reservations', 'activities', 'settings', 'operation_logs', 'feedbacks', 'notices']
 
     const results = []
 

@@ -1,0 +1,33 @@
+﻿<view class="page">
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+
+  <view wx:else class="card">
+    <view class="group">
+      <text class="label">标题</text>
+      <input class="input" placeholder="请输入通知标题" value="{{title}}" data-key="title" bindinput="bindInput" />
+    </view>
+
+    <view class="group">
+      <text class="label">内容</text>
+      <textarea class="textarea" placeholder="请输入通知内容" value="{{content}}" data-key="content" bindinput="bindInput"></textarea>
+    </view>
+
+    <view class="group row">
+      <text class="label">是否置顶</text>
+      <switch checked="{{is_pinned}}" bindchange="bindPinned" />
+    </view>
+
+    <view class="group">
+      <text class="label">发布状态</text>
+      <view class="status-row">
+        <view class="status {{status==='draft'?'active':''}}" data-status="draft" bindtap="selectStatus">草稿</view>
+        <view class="status {{status==='published'?'active':''}}" data-status="published" bindtap="selectStatus">立即发布</view>
+      </view>
+    </view>
+
+    <view class="btn-row">
+      <button class="draft" bindtap="saveDraft" loading="{{saving}}">保存草稿</button>
+      <button class="publish" bindtap="publish" loading="{{saving}}">发布</button>
+    </view>
+  </view>
+</view>

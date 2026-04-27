@@ -1,0 +1,105 @@
+/* pages/notices/notices.wxss */
+page {
+  background: #f0f2f7;
+  min-height: 100vh;
+}
+
+.page {
+  padding: 20rpx 24rpx 60rpx;
+}
+
+/* States */
+.state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+  gap: 20rpx;
+}
+
+.state-icon {
+  font-size: 80rpx;
+}
+
+.state-text {
+  font-size: 26rpx;
+  color: #9ca3af;
+}
+
+.spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #2563eb;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Notice Card */
+.notice-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 26rpx 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
+}
+
+.notice-card:active {
+  background: #f9fafb;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-bottom: 10rpx;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex: 1;
+}
+
+.pin-badge {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.notice-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.chevron {
+  font-size: 36rpx;
+  color: #d1d5db;
+  flex-shrink: 0;
+  margin-top: -2rpx;
+}
+
+.notice-preview {
+  display: block;
+  font-size: 24rpx;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 10rpx;
+}
+
+.notice-time {
+  display: block;
+  font-size: 22rpx;
+  color: #9ca3af;
+}

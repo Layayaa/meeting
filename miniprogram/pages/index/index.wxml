@@ -1,106 +1,91 @@
 <!-- pages/index/index.wxml -->
 <view class="page">
-  <!-- Hero Banner -->
-  <view class="hero">
-    <view class="hero-bg"></view>
-    <view class="hero-content">
-      <view class="hero-top">
-        <view class="hero-greeting">
-          <text class="hero-hello">你好 👋</text>
-          <text class="hero-name">{{displayName || '访客'}}</text>
-        </view>
-        <view wx:if="{{isAdmin}}" class="admin-badge">管理员</view>
-      </view>
-      <view class="hero-dept" wx:if="{{userInfo.department}}">
-        <text>{{userInfo.department}}</text>
-      </view>
-      <view class="hero-stats" wx:if="{{isBound && userStatus === 'active'}}">
-        <view class="stat-item">
-          <text class="stat-num">{{remainingCount}}</text>
-          <text class="stat-label">本周剩余</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item">
-          <text class="stat-num">{{userInfo.extra_count || 0}}</text>
-          <text class="stat-label">额外派发</text>
-        </view>
-      </view>
+
+  <!-- Header: 用户信息 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="header-greeting">你好，{{displayName || '访客'}}</text>
+      <text class="header-sub" wx:if="{{userInfo.department}}">{{userInfo.department}}</text>
+      <text class="header-sub" wx:elif="{{!isBound}}">登录后可使用预约功能</text>
+    </view>
+    <view wx:if="{{isAdmin}}" class="admin-tag">管理员</view>
+  </view>
+
+  <!-- 状态提示（仅异常时显示） -->
+  <view wx:if="{{!isBound}}" class="banner banner-warn" bindtap="goLogin">
+    <text class="banner-text">⚠️ 未登录，点击前往登录</text>
+    <text class="banner-arrow">›</text>
+  </view>
+  <view wx:elif="{{userStatus === 'disabled'}}" class="banner banner-danger">
+    <text class="banner-text">🚫 账户已禁用，请联系管理员</text>
+  </view>
+
+  <!-- 本周预约额度（已登录才显示） -->
+  <view wx:if="{{isBound && userStatus === 'active'}}" class="quota-card" bindtap="goReserve">
+    <view class="quota-left">
+      <text class="quota-title">本周可用次数</text>
+      <text class="quota-hint">点击立即预约</text>
+    </view>
+    <view class="quota-right">
+      <text class="quota-num {{remainingCount <= 0 ? 'zero' : ''}}">{{remainingCount}}</text>
+      <text class="quota-unit">次</text>
     </view>
   </view>
 
-  <!-- Status Alert -->
-  <view wx:if="{{!isBound}}" class="alert alert-warn">
-    <view class="alert-icon">⚠️</view>
-    <view class="alert-body">
-      <text class="alert-title">未绑定账号</text>
-      <text class="alert-desc">请登录或注册后使用预约功能</text>
-    </view>
-  </view>
-  <view wx:if="{{isBound && userStatus === 'disabled'}}" class="alert alert-danger">
-    <view class="alert-icon">🚫</view>
-    <view class="alert-body">
-      <text class="alert-title">账户已禁用</text>
-      <text class="alert-desc">请联系管理员处理</text>
-    </view>
-  </view>
-
-  <!-- Quick Actions -->
-  <view class="section">
-    <view class="section-header">
-      <text class="section-title">快捷入口</text>
-    </view>
-    <view class="quick-grid">
-      <view class="quick-item {{!isBound || userStatus === 'disabled' ? 'disabled' : ''}}" bindtap="goReserve">
-        <view class="quick-icon-wrap blue">
-          <image class="quick-icon" src="../../images/icons/reserve.png" mode="aspectFit"></image>
-        </view>
-        <text class="quick-label">预约会议室</text>
-      </view>
-      <view class="quick-item" bindtap="goMyReservations">
-        <view class="quick-icon-wrap purple">
-          <image class="quick-icon" src="../../images/icons/my.png" mode="aspectFit"></image>
-        </view>
-        <text class="quick-label">我的预约</text>
-      </view>
-      <view class="quick-item" bindtap="goActivities">
-        <view class="quick-icon-wrap green">
-          <image class="quick-icon" src="../../images/icons/examples.png" mode="aspectFit"></image>
-        </view>
-        <text class="quick-label">活动列表</text>
-      </view>
-      <view wx:if="{{isAdmin}}" class="quick-item" bindtap="goAdmin">
-        <view class="quick-icon-wrap orange">
-          <image class="quick-icon" src="../../images/icons/admin.png" mode="aspectFit"></image>
-        </view>
-        <text class="quick-label">管理后台</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- Today's Rooms -->
+  <!-- 今日会议室状态 -->
   <view class="section">
     <view class="section-header">
       <text class="section-title">今日会议室</text>
-      <text class="section-date">{{todayDisplay}}</text>
+      <text class="section-sub">{{todayDisplay}}</text>
     </view>
-    <view class="room-card">
+    <view class="room-list">
       <view
         wx:for="{{todayRooms}}"
         wx:key="room"
-        class="room-row {{index < todayRooms.length - 1 ? 'has-divider' : ''}}"
+        class="room-item {{index < todayRooms.length - 1 ? 'divider' : ''}}"
         data-room="{{item.room}}"
         bindtap="goReserveWithRoom"
       >
-        <view class="room-info">
+        <view class="room-left">
           <view class="room-dot {{item.isFree ? 'free' : 'busy'}}"></view>
           <text class="room-name">{{item.room}}</text>
         </view>
-        <view class="room-status">
-          <text wx:if="{{item.isFree}}" class="status-free">空闲</text>
-          <text wx:else class="status-busy">{{item.statusText}}</text>
-          <text class="row-arrow">›</text>
+        <view class="room-right">
+          <text class="{{item.isFree ? 'tag-free' : 'tag-busy'}}">{{item.isFree ? '空闲' : item.statusText}}</text>
+          <text class="chevron">›</text>
         </view>
       </view>
     </view>
   </view>
+
+  <!-- 最新通知（有通知才显示） -->
+  <view wx:if="{{noticePreview || noticePreviewLoading}}" class="section">
+    <view class="section-header">
+      <text class="section-title">最新通知</text>
+      <text class="section-link" bindtap="goNotices">全部 ›</text>
+    </view>
+    <view class="notice-card" bindtap="openNoticePreview">
+      <view wx:if="{{noticePreviewLoading}}" class="notice-loading">加载中...</view>
+      <view wx:else>
+        <view class="notice-title-row">
+          <text wx:if="{{noticePreview.is_pinned}}" class="pin-tag">置顶</text>
+          <text class="notice-title">{{noticePreview.title}}</text>
+        </view>
+        <text class="notice-body">{{noticePreview.contentPreview}}</text>
+        <text class="notice-time">{{noticePreview.timeText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 管理员入口（仅管理员显示） -->
+  <view wx:if="{{isAdmin}}" class="section">
+    <view class="admin-entry" bindtap="goAdmin">
+      <view class="admin-entry-left">
+        <text class="admin-entry-icon">⚙️</text>
+        <text class="admin-entry-text">进入管理后台</text>
+      </view>
+      <text class="chevron">›</text>
+    </view>
+  </view>
+
 </view>

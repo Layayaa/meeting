@@ -1,0 +1,16 @@
+﻿<view class="page">
+  <view wx:if="{{loading}}" class="empty">加载中...</view>
+
+  <view wx:elif="{{!list.length}}" class="empty">
+    <text>暂无反馈记录</text>
+    <button class="submit" bindtap="goSubmit">提交反馈</button>
+  </view>
+
+  <view wx:for="{{list}}" wx:key="_id" class="card" data-id="{{item._id}}" bindtap="openDetail">
+    <text class="content">{{item.content_summary}}{{item.content.length > 50 ? '...' : ''}}</text>
+    <view class="meta-row">
+      <text class="time">{{item.created_at}}</text>
+      <text class="status {{item.status}}">{{item.statusText}}</text>
+    </view>
+  </view>
+</view>

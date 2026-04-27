@@ -1,0 +1,10 @@
+﻿page { background: #f3f4f6; }
+.page { padding: 20rpx; }
+.empty { text-align: center; color: #9ca3af; padding: 60rpx 0; }
+.card { background: #fff; border-radius: 14rpx; padding: 20rpx; margin-bottom: 14rpx; }
+.title { display: block; font-size: 28rpx; font-weight: 700; color: #111827; margin-bottom: 10rpx; }
+.content { display: block; font-size: 27rpx; color: #374151; line-height: 1.7; white-space: pre-wrap; }
+.time { display: block; margin-top: 10rpx; color: #9ca3af; font-size: 22rpx; }
+.empty-reply { color: #9ca3af; font-size: 26rpx; }
+.img-grid { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 14rpx; }
+.img { width: 200rpx; height: 200rpx; border-radius: 10rpx; }

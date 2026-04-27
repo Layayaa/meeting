@@ -2,8 +2,10 @@
 Page({
   data: {
     isBound: false,
+    isAdmin: false,
     userStatus: 'inactive',
     userInfo: null,
+    avatarChar: '用',
     remainingCount: 0,
     reservations: [],
     loading: false
@@ -41,6 +43,7 @@ Page({
         const avatarChar = userInfo ? (userInfo.name || '用').charAt(0) : '用'
         this.setData({
           isBound,
+          isAdmin: !!result.isAdmin,
           userStatus: result.userStatus || 'inactive',
           userInfo,
           avatarChar,
@@ -103,6 +106,18 @@ Page({
     })
   },
 
+  goFeedbackSubmit() {
+    wx.navigateTo({
+      url: '/pages/feedbackSubmit/feedbackSubmit'
+    })
+  },
+
+  goMyFeedbacks() {
+    wx.navigateTo({
+      url: '/pages/myFeedbacks/myFeedbacks'
+    })
+  },
+
   logout() {
     wx.showModal({
       title: '退出登录',
@@ -149,6 +164,30 @@ Page({
         })
       }
     })
+  },
+
+  goUserManage() {
+    wx.navigateTo({ url: '/pages/userManage/userManage' })
+  },
+
+  goReservationManage() {
+    wx.navigateTo({ url: '/pages/reservationManage/reservationManage' })
+  },
+
+  goFeedbackManage() {
+    wx.navigateTo({ url: '/pages/feedbackManage/feedbackManage' })
+  },
+
+  goNoticeManage() {
+    wx.navigateTo({ url: '/pages/noticeManage/noticeManage' })
+  },
+
+  goActivityManage() {
+    wx.navigateTo({ url: '/pages/activityManage/activityManage' })
+  },
+
+  goSettings() {
+    wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
   formatStatus(status) {

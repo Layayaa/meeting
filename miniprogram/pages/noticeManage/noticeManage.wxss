@@ -1,0 +1,20 @@
+﻿page { background: #f3f4f6; }
+.page { padding: 20rpx; }
+.top-actions { margin-bottom: 12rpx; }
+.create { background: #2563eb; color: #fff; border-radius: 10rpx; border: none; }
+.tabs { display: flex; gap: 10rpx; margin-bottom: 14rpx; }
+.tab { flex: 1; text-align: center; height: 64rpx; line-height: 64rpx; border-radius: 10rpx; background: #e5e7eb; color: #4b5563; }
+.tab.active { background: #2563eb; color: #fff; }
+.empty { text-align: center; color: #9ca3af; padding: 60rpx 0; }
+.card { background: #fff; border-radius: 14rpx; padding: 18rpx; margin-bottom: 12rpx; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.title { font-size: 28rpx; font-weight: 700; color: #111827; flex: 1; }
+.tags { display: flex; gap: 6rpx; }
+.tag { font-size: 20rpx; padding: 2rpx 10rpx; border-radius: 10rpx; }
+.tag.pin { background: #fee2e2; color: #dc2626; }
+.tag.status.draft { background: #e5e7eb; color: #4b5563; }
+.tag.status.published { background: #dcfce7; color: #15803d; }
+.time { display: block; margin-top: 8rpx; color: #9ca3af; font-size: 22rpx; }
+.actions { margin-top: 12rpx; display: flex; gap: 10rpx; }
+.edit { flex: 1; background: #eff6ff; color: #1d4ed8; border-radius: 10rpx; border: none; }
+.del { flex: 1; background: #fef2f2; color: #dc2626; border-radius: 10rpx; border: none; }

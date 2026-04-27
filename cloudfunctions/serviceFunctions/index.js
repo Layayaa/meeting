@@ -125,6 +125,12 @@ function mapReservationStatus(status) {
   return status || '未知'
 }
 
+function mapFeedbackStatus(status) {
+  if (status === 'pending') return '待回复'
+  if (status === 'replied') return '已回复'
+  return status || '未知'
+}
+
 async function getSettings() {
   const settingsRes = await db.collection('settings').where({ key: 'weekly_settings' }).get()
   const settings = settingsRes.data[0] || DEFAULT_SETTINGS
@@ -297,6 +303,26 @@ async function decorateReservations(reservations) {
   })
 }
 
+function isNoticePublished(notice) {
+  return notice && notice.status === 'published'
+}
+
+function formatNoticeSummary(notice) {
+  return {
+    ...notice,
+    is_pinned: !!notice.is_pinned,
+    status: notice.status || 'draft'
+  }
+}
+
+function formatFeedbackSummary(item) {
+  return {
+    ...item,
+    statusText: mapFeedbackStatus(item.status),
+    content_summary: String(item.content || '').slice(0, 50)
+  }
+}
+
 exports.main = async (event) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -357,6 +383,206 @@ exports.main = async (event) => {
     if (action === 'getActivities') {
       const res = await db.collection('activities').orderBy('time', 'desc').get()
       return { success: true, activities: res.data }
+    }
+
+    if (action === 'submitFeedback') {
+      const user = await getUserByOpenid(openid)
+      if (!user) {
+        return { success: false, message: '请先登录后再提交反馈' }
+      }
+      const content = String(event.content || '').trim()
+      const images = Array.isArray(event.images) ? event.images.filter(Boolean).slice(0, 3) : []
+      if (!content) {
+        return { success: false, message: '请填写反馈内容' }
+      }
+      if (content.length > 500) {
+        return { success: false, message: '反馈内容最多500字' }
+      }
+      const addRes = await db.collection('feedbacks').add({
+        data: {
+          openid,
+          user_name: user.name || '用户',
+          user_phone: user.phone || '',
+          content,
+          images,
+          status: 'pending',
+          admin_reply: '',
+          replied_at: null,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      })
+      return { success: true, feedbackId: addRes._id, message: '感谢您的反馈' }
+    }
+
+    if (action === 'getMyFeedbacks') {
+      const listRes = await db.collection('feedbacks')
+        .where({ openid })
+        .orderBy('created_at', 'desc')
+        .get()
+      const feedbacks = (listRes.data || []).map(formatFeedbackSummary)
+      return { success: true, feedbacks }
+    }
+
+    if (action === 'getFeedbackDetail') {
+      const feedbackId = String(event.feedbackId || '')
+      if (!feedbackId) {
+        return { success: false, message: '缺少反馈ID' }
+      }
+      const docRes = await db.collection('feedbacks').doc(feedbackId).get()
+      const detail = docRes.data
+      if (!detail) {
+        return { success: false, message: '反馈记录不存在' }
+      }
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin && detail.openid !== openid) {
+        return { success: false, message: '无权限查看该反馈' }
+      }
+      return {
+        success: true,
+        feedback: {
+          ...detail,
+          statusText: mapFeedbackStatus(detail.status)
+        }
+      }
+    }
+
+    if (action === 'getFeedbacksAdmin') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const status = String(event.status || 'all')
+      const query = {}
+      if (status === 'pending' || status === 'replied') {
+        query.status = status
+      }
+      const listRes = await db.collection('feedbacks')
+        .where(query)
+        .orderBy('created_at', 'desc')
+        .get()
+      const feedbacks = (listRes.data || []).map((item) => ({
+        ...formatFeedbackSummary(item),
+        content_summary: String(item.content || '').slice(0, 30)
+      }))
+      return { success: true, feedbacks }
+    }
+
+    if (action === 'replyFeedback') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const feedbackId = String(event.feedbackId || '')
+      const reply = String(event.admin_reply || '').trim()
+      if (!feedbackId) {
+        return { success: false, message: '缺少反馈ID' }
+      }
+      if (!reply) {
+        return { success: false, message: '请输入回复内容' }
+      }
+      if (reply.length > 500) {
+        return { success: false, message: '回复内容最多500字' }
+      }
+      await db.collection('feedbacks').doc(feedbackId).update({
+        data: {
+          status: 'replied',
+          admin_reply: reply,
+          replied_at: new Date(),
+          updated_at: new Date()
+        }
+      })
+      return { success: true, message: '回复成功' }
+    }
+
+    if (action === 'getNotices') {
+      const scope = String(event.scope || 'user')
+      const baseQuery = scope === 'admin' ? {} : { status: 'published' }
+      const listRes = await db.collection('notices')
+        .where(baseQuery)
+        .orderBy('is_pinned', 'desc')
+        .orderBy('published_at', 'desc')
+        .orderBy('created_at', 'desc')
+        .get()
+      const notices = (listRes.data || []).map(formatNoticeSummary)
+      return { success: true, notices }
+    }
+
+    if (action === 'getNoticeDetail') {
+      const noticeId = String(event.noticeId || '')
+      if (!noticeId) {
+        return { success: false, message: '缺少通知ID' }
+      }
+      const docRes = await db.collection('notices').doc(noticeId).get()
+      const notice = docRes.data
+      if (!notice) {
+        return { success: false, message: '通知不存在' }
+      }
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin && !isNoticePublished(notice)) {
+        return { success: false, message: '通知未发布' }
+      }
+      return { success: true, notice: formatNoticeSummary(notice) }
+    }
+
+    if (action === 'saveNotice') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const noticeId = String(event.noticeId || '')
+      const title = String(event.title || '').trim()
+      const content = String(event.content || '').trim()
+      const isPinned = !!event.is_pinned
+      const status = event.status === 'published' ? 'published' : 'draft'
+      if (!title) {
+        return { success: false, message: '请输入通知标题' }
+      }
+      if (!content) {
+        return { success: false, message: '请输入通知内容' }
+      }
+      const now = new Date()
+      if (noticeId) {
+        const updateData = {
+          title,
+          content,
+          is_pinned: isPinned,
+          status,
+          updated_at: now
+        }
+        if (status === 'published') {
+          updateData.published_at = now
+        }
+        await db.collection('notices').doc(noticeId).update({
+          data: updateData
+        })
+        return { success: true, message: '保存成功', noticeId }
+      }
+      const addRes = await db.collection('notices').add({
+        data: {
+          title,
+          content,
+          is_pinned: isPinned,
+          status,
+          created_at: now,
+          updated_at: now,
+          published_at: status === 'published' ? now : null
+        }
+      })
+      return { success: true, message: '保存成功', noticeId: addRes._id }
+    }
+
+    if (action === 'deleteNotice') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const noticeId = String(event.noticeId || '')
+      if (!noticeId) {
+        return { success: false, message: '缺少通知ID' }
+      }
+      await db.collection('notices').doc(noticeId).remove()
+      return { success: true, message: '删除成功' }
     }
 
     if (action === 'getUsers') {

@@ -1,0 +1,37 @@
+<!-- pages/notices/notices.wxml -->
+<view class="page">
+
+  <!-- Loading -->
+  <view wx:if="{{loading}}" class="state-wrap">
+    <view class="spinner"></view>
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <!-- Empty -->
+  <view wx:elif="{{!notices.length}}" class="state-wrap">
+    <text class="state-icon">📭</text>
+    <text class="state-text">暂无通知公告</text>
+  </view>
+
+  <!-- List -->
+  <view wx:else>
+    <view
+      wx:for="{{notices}}"
+      wx:key="_id"
+      class="notice-card"
+      data-id="{{item._id}}"
+      bindtap="openNotice"
+    >
+      <view class="card-top">
+        <view class="title-row">
+          <view wx:if="{{item.is_pinned}}" class="pin-badge">置顶</view>
+          <text class="notice-title">{{item.title}}</text>
+        </view>
+        <text class="chevron">›</text>
+      </view>
+      <text wx:if="{{item.contentPreview}}" class="notice-preview">{{item.contentPreview}}</text>
+      <text class="notice-time">{{item.timeText}}</text>
+    </view>
+  </view>
+
+</view>
