@@ -52,6 +52,7 @@
     <!-- Reservation List -->
     <view class="section-title-row">
       <text class="section-title">我的预约</text>
+      <button class="logout-btn" bindtap="logout">退出登录</button>
     </view>
 
     <view wx:if="{{!reservations.length}}" class="list-empty">

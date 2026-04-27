@@ -15,7 +15,6 @@ exports.main = async () => {
     const tasks = usersRes.data.map((user) => db.collection('users').doc(user._id).update({
       data: {
         used_count: 0,
-        extra_count: 0,
         last_reset: now
       }
     }))

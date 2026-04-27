@@ -1,7 +1,20 @@
 <!-- pages/activities/activities.wxml -->
 <view class="page">
+  <view wx:if="{{loading}}" class="empty-state">
+    <view class="empty-icon">⏳</view>
+    <text class="empty-title">活动加载中</text>
+    <text class="empty-desc">请稍候...</text>
+  </view>
+
+  <view wx:elif="{{errorMsg}}" class="empty-state">
+    <view class="empty-icon">⚠️</view>
+    <text class="empty-title">加载失败</text>
+    <text class="empty-desc">{{errorMsg}}</text>
+    <button class="retry-btn" bindtap="loadActivities">重试</button>
+  </view>
+
   <!-- Empty State -->
-  <view wx:if="{{!activities.length}}" class="empty-state">
+  <view wx:elif="{{!activities.length}}" class="empty-state">
     <view class="empty-icon">🎉</view>
     <text class="empty-title">暂无活动</text>
     <text class="empty-desc">敬请期待后续活动</text>

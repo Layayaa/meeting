@@ -134,8 +134,32 @@ page {
 }
 
 .status-badge.pending { background: #eff6ff; color: #2563eb; }
-.status-badge.completed { background: #f0fdf4; color: #059669; }
+.status-badge.expired { background: #fff7ed; color: #c2410c; }
 .status-badge.cancelled { background: #f9fafb; color: #9ca3af; }
+.status-badge.completed { background: #f0fdf4; color: #059669; }
+
+.status-tabs {
+  display: flex;
+  gap: 10rpx;
+  margin: 6rpx 0 14rpx;
+  overflow-x: auto;
+}
+
+.status-tab {
+  flex-shrink: 0;
+  height: 60rpx;
+  line-height: 60rpx;
+  padding: 0 24rpx;
+  border-radius: 30rpx;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+.status-tab.active {
+  background: #2563eb;
+  color: #fff;
+}
 
 .card-body {
   padding: 16rpx 24rpx;

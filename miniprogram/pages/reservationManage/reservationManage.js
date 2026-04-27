@@ -2,10 +2,18 @@
 Page({
   data: {
     reservations: [],
+    displayReservations: [],
     filterDateFrom: '',
     filterDateTo: '',
     filterRoom: '',
-    filterUserName: ''
+    filterUserName: '',
+    statusTab: 'all',
+    statusTabs: [
+      { key: 'all', label: '全部' },
+      { key: 'pending', label: '待使用' },
+      { key: 'expired', label: '已过期' },
+      { key: 'cancelled', label: '已取消' }
+    ]
   },
 
   onShow() {
@@ -30,9 +38,11 @@ Page({
         }
         const reservations = (res.result.reservations || []).map((item) => ({
           ...item,
-          statusText: that.formatStatus(item.status)
+          uiStatus: that.getUIStatus(item),
+          statusText: that.formatStatus(that.getUIStatus(item))
         }))
         that.setData({ reservations })
+        that.applyStatusFilter()
       },
       fail(err) {
         console.error('加载失败', err)
@@ -59,9 +69,44 @@ Page({
 
   formatStatus(status) {
     if (status === 'pending') return '待使用'
-    if (status === 'completed') return '已完成'
+    if (status === 'expired') return '已过期'
     if (status === 'cancelled') return '已取消'
+    if (status === 'completed') return '已完成'
     return status || '未知'
+  },
+
+  parseReservationEndTime(reservation) {
+    const slot = String(reservation.time_slot || '')
+    const parts = slot.split('-')
+    const end = parts[1]
+    if (!end || !reservation.date) return null
+    const dt = new Date(`${reservation.date}T${end}:00`)
+    if (Number.isNaN(dt.getTime())) return null
+    return dt
+  },
+
+  getUIStatus(reservation) {
+    if (reservation.status === 'cancelled') return 'cancelled'
+    const endTime = this.parseReservationEndTime(reservation)
+    if (endTime && new Date() > endTime) return 'expired'
+    return 'pending'
+  },
+
+  selectStatusTab(e) {
+    const tab = e.currentTarget.dataset.tab
+    if (!tab || tab === this.data.statusTab) return
+    this.setData({ statusTab: tab })
+    this.applyStatusFilter()
+  },
+
+  applyStatusFilter() {
+    const tab = this.data.statusTab
+    const list = this.data.reservations || []
+    let displayReservations = list
+    if (tab !== 'all') {
+      displayReservations = list.filter((item) => item.uiStatus === tab)
+    }
+    this.setData({ displayReservations })
   },
 
   search() {

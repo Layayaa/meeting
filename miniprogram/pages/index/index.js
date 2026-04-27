@@ -8,17 +8,43 @@ Page({
     userInfo: null,
     displayName: '用户',
     todayDisplay: '',
-    todayRooms: []
+    todayRooms: [],
+    rooms: ['会议室A', '会议室B', '会议室C']
   },
 
   onLoad: function() {
     this.initTodayDisplay();
+    this.loadRoomSettings();
     this.checkUserStatus();
   },
 
   onShow: function() {
     this.initTodayDisplay();
+    this.loadRoomSettings();
     this.checkUserStatus();
+  },
+
+  loadRoomSettings: function() {
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: { action: 'getSettings' },
+      success: (res) => {
+        const settings = res.result && res.result.settings;
+        const rooms = (settings && Array.isArray(settings.room_names) && settings.room_names.length)
+          ? settings.room_names
+          : ['会议室A', '会议室B', '会议室C'];
+        this.setData({ rooms }, () => {
+          this.loadTodayRooms();
+        });
+      },
+      fail: () => {
+        this.setData({
+          rooms: ['会议室A', '会议室B', '会议室C']
+        }, () => {
+          this.loadTodayRooms();
+        });
+      }
+    });
   },
 
   initTodayDisplay: function() {
@@ -44,7 +70,6 @@ Page({
           displayName: userInfo && userInfo.name ? userInfo.name : '用户',
           remainingCount: Number(result.remainingCount) || 0
         });
-        that.loadTodayRooms();
       },
       fail: err => {
         console.error('获取用户状态失败', err);
@@ -56,7 +81,6 @@ Page({
           displayName: '用户',
           remainingCount: 0
         });
-        that.loadTodayRooms();
       }
     });
   },
@@ -67,7 +91,9 @@ Page({
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const today = `${year}-${month}-${day}`;
-    const rooms = ['会议室A', '会议室B', '会议室C'];
+    const rooms = this.data.rooms && this.data.rooms.length
+      ? this.data.rooms
+      : ['会议室A', '会议室B', '会议室C'];
     wx.cloud.callFunction({
       name: 'getReservationsByDate',
       data: { date: today },

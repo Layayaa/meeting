@@ -68,6 +68,35 @@ page {
   color: #6b7280;
 }
 
+.room-setting-wrap {
+  padding-top: 16rpx;
+}
+
+.room-input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+
+.room-index {
+  width: 130rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.room-input {
+  flex: 1;
+  height: 68rpx;
+  background: #f9fafb;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 10rpx;
+  padding: 0 16rpx;
+  font-size: 26rpx;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
 .divider {
   height: 1rpx;
   background: #f3f4f6;

@@ -20,9 +20,27 @@ Page({
 
   onLoad: function() {
     this.initTimeSlots();
+    this.loadRoomSettings();
     this.checkUserStatus();
     this.generateDates();
     this.setDefaultDate();
+  },
+
+  loadRoomSettings: function() {
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: { action: 'getSettings' },
+      success: (res) => {
+        const settings = res.result && res.result.settings
+        const rooms = (settings && Array.isArray(settings.room_names) && settings.room_names.length)
+          ? settings.room_names
+          : ['会议室A', '会议室B', '会议室C']
+        this.setData({ rooms })
+      },
+      fail: (err) => {
+        console.error('加载会议室设置失败', err)
+      }
+    })
   },
 
   initTimeSlots: function() {

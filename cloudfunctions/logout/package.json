@@ -1,0 +1,9 @@
+{
+  "name": "logout",
+  "version": "1.0.0",
+  "description": "退出当前账号并解绑openid",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

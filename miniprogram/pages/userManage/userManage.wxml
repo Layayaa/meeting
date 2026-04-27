@@ -107,6 +107,7 @@
         data-status="{{item.status === 'active' ? 'disabled' : 'active'}}"
         bindtap="toggleStatus"
       >{{item.status === 'active' ? '禁用账号' : '启用账号'}}</button>
+      <button class="reset-btn" data-userid="{{item._id}}" bindtap="resetPassword">重置密码</button>
     </view>
   </view>
 </view>

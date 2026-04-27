@@ -36,6 +36,7 @@ exports.main = async (event, context) => {
             weekly_default: 1,
             reset_time: '22:00',
             reset_day: 6, // 周六
+            room_names: ['会议室A', '会议室B', '会议室C'],
             created_at: new Date()
           }
         })

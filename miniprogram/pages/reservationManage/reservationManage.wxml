@@ -27,15 +27,25 @@
   <!-- Results -->
   <view class="section-title-row">
     <text class="section-title">预约记录</text>
-    <text class="section-count" wx:if="{{reservations.length}}">共 {{reservations.length}} 条</text>
+    <text class="section-count" wx:if="{{displayReservations.length}}">共 {{displayReservations.length}} 条</text>
   </view>
 
-  <view wx:if="{{!reservations.length}}" class="empty-state">
+  <view class="status-tabs">
+    <view
+      wx:for="{{statusTabs}}"
+      wx:key="key"
+      class="status-tab {{statusTab === item.key ? 'active' : ''}}"
+      data-tab="{{item.key}}"
+      bindtap="selectStatusTab"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{!displayReservations.length}}" class="empty-state">
     <text class="empty-icon">📋</text>
     <text class="empty-text">暂无预约记录</text>
   </view>
 
-  <view wx:for="{{reservations}}" wx:key="_id" class="reserve-card">
+  <view wx:for="{{displayReservations}}" wx:key="_id" class="reserve-card">
     <view class="card-top">
       <view class="user-info-row">
         <text class="user-name">{{item.user_name}}</text>
@@ -56,7 +66,7 @@
         <text class="info-text">{{item.purpose}}</text>
       </view>
     </view>
-    <view wx:if="{{item.status === 'pending'}}" class="card-footer">
+    <view wx:if="{{item.status === 'pending' && item.uiStatus !== 'expired'}}" class="card-footer">
       <button class="cancel-btn" data-id="{{item._id}}" bindtap="forceCancel">强制取消</button>
     </view>
   </view>

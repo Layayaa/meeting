@@ -1,5 +1,6 @@
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
+const crypto = require('crypto')
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
@@ -8,12 +9,31 @@ cloud.init({
 const db = cloud.database()
 const _ = db.command
 const DEFAULT_SETTINGS = { weekly_default: 1, reset_time: '22:00', reset_day: 6 }
+const DEFAULT_ROOMS = ['会议室A', '会议室B', '会议室C']
 
 function normalizePhone(value) {
   const digits = String(value || '').replace(/\D/g, '')
   if (digits.length === 11) return digits
   if (digits.length === 13 && digits.startsWith('86')) return digits.slice(2)
   return digits
+}
+
+function hashPassword(password, salt) {
+  return crypto.createHash('sha256').update(`${salt}:${password}`).digest('hex')
+}
+
+function createPasswordRecord(password) {
+  const salt = crypto.randomBytes(16).toString('hex')
+  return {
+    password_salt: salt,
+    password_hash: hashPassword(password, salt)
+  }
+}
+
+function getDefaultPasswordByPhone(phone) {
+  const normalized = normalizePhone(phone)
+  if (!/^1\d{10}$/.test(normalized)) return ''
+  return normalized.slice(-6)
 }
 
 function parseReservationDateTime(date, timeSlot) {
@@ -52,9 +72,25 @@ function normalizeInt(v, fallback = 0) {
   return Math.floor(n)
 }
 
+function normalizeRoomNames(roomNames) {
+  const source = Array.isArray(roomNames) ? roomNames.slice(0, 10) : []
+  const cleaned = source
+    .map((name) => String(name || '').trim())
+    .filter(Boolean)
+  const unique = []
+  cleaned.forEach((name) => {
+    if (!unique.includes(name)) {
+      unique.push(name)
+    }
+  })
+  return unique.length > 0 ? unique : DEFAULT_ROOMS
+}
+
 function getWeekDefault(user, settings) {
-  if (typeof user.weekly_default === 'number' && user.weekly_default > 0) return user.weekly_default
-  return settings.weekly_default || 1
+  if (typeof settings.weekly_default === 'number' && settings.weekly_default > 0) {
+    return settings.weekly_default
+  }
+  return 1
 }
 
 function calcRemainingCount(user, settings) {
@@ -92,11 +128,14 @@ function mapReservationStatus(status) {
 async function getSettings() {
   const settingsRes = await db.collection('settings').where({ key: 'weekly_settings' }).get()
   const settings = settingsRes.data[0] || DEFAULT_SETTINGS
+  const rooms = normalizeRoomNames(settings.room_names)
   return {
     _id: settings._id,
     weekly_default: normalizeInt(settings.weekly_default, DEFAULT_SETTINGS.weekly_default),
     reset_time: settings.reset_time || DEFAULT_SETTINGS.reset_time,
-    reset_day: typeof settings.reset_day === 'number' ? settings.reset_day : DEFAULT_SETTINGS.reset_day
+    reset_day: typeof settings.reset_day === 'number' ? settings.reset_day : DEFAULT_SETTINGS.reset_day,
+    rooms,
+    room_names: rooms
   }
 }
 
@@ -144,7 +183,6 @@ async function refreshWeeklyCountsCore() {
   const tasks = usersRes.data.map((user) => db.collection('users').doc(user._id).update({
     data: {
       used_count: 0,
-      extra_count: 0,
       last_reset: now
     }
   }))
@@ -432,6 +470,40 @@ exports.main = async (event) => {
       return { success: true, message: '更新成功' }
     }
 
+    if (action === 'resetUserPassword') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const { userId } = event
+      if (!userId) {
+        return { success: false, message: '缺少用户ID' }
+      }
+      const userRes = await db.collection('users').doc(userId).get()
+      const user = userRes.data
+      if (!user) {
+        return { success: false, message: '用户不存在' }
+      }
+      const defaultPassword = getDefaultPasswordByPhone(user.phone)
+      if (!defaultPassword) {
+        return { success: false, message: '手机号无效，无法重置密码' }
+      }
+      await db.collection('users').doc(userId).update({
+        data: {
+          ...createPasswordRecord(defaultPassword),
+          password: '',
+          updated_at: new Date()
+        }
+      })
+      await writeOperationLog({
+        type: 'reset_user_password',
+        operator_openid: openid,
+        operator_phone: adminInfo.user.phone,
+        target_user_id: userId
+      })
+      return { success: true, message: '重置成功，新密码为手机号后6位' }
+    }
+
     if (action === 'getReservationsAdmin') {
       const adminInfo = await getAdminInfoByOpenid(openid)
       if (!adminInfo.isAdmin) {
@@ -551,6 +623,7 @@ exports.main = async (event) => {
       const weeklyDefault = normalizeInt(event.weekly_default, DEFAULT_SETTINGS.weekly_default)
       const resetTime = String(event.reset_time || DEFAULT_SETTINGS.reset_time)
       const resetDay = normalizeInt(event.reset_day, DEFAULT_SETTINGS.reset_day)
+      const roomNames = normalizeRoomNames(event.room_names)
       if (weeklyDefault <= 0) {
         return { success: false, message: '默认次数必须大于0' }
       }
@@ -567,6 +640,7 @@ exports.main = async (event) => {
             weekly_default: weeklyDefault,
             reset_time: resetTime,
             reset_day: resetDay,
+            room_names: roomNames,
             updated_at: new Date()
           }
         })
@@ -577,6 +651,7 @@ exports.main = async (event) => {
             weekly_default: weeklyDefault,
             reset_time: resetTime,
             reset_day: resetDay,
+            room_names: roomNames,
             created_at: new Date()
           }
         })

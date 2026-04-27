@@ -47,9 +47,9 @@ function isSameOrAdjacentTimeSlot(a, b) {
 }
 
 function calcRemainingCount(user, settings) {
-  const weeklyDefault = typeof user.weekly_default === 'number' && user.weekly_default > 0
-    ? user.weekly_default
-    : (settings.weekly_default || 1)
+  const weeklyDefault = typeof settings.weekly_default === 'number' && settings.weekly_default > 0
+    ? settings.weekly_default
+    : 1
   const extra = Number(user.extra_count) || 0
   const used = Number(user.used_count) || 0
   return Math.max(0, weeklyDefault + extra - used)

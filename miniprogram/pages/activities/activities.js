@@ -1,7 +1,9 @@
 // pages/activities/activities.js
 Page({
   data: {
-    activities: []
+    activities: [],
+    loading: false,
+    errorMsg: ''
   },
 
   onShow() {
@@ -9,18 +11,38 @@ Page({
   },
 
   loadActivities() {
-    const that = this
+    this.setData({
+      loading: true,
+      errorMsg: ''
+    })
     wx.cloud.callFunction({
       name: 'serviceFunctions',
       data: {
         action: 'getActivities'
       },
-      success(res) {
-        that.setData({ activities: res.result.activities || [] })
+      success: (res) => {
+        const result = (res && res.result) || {}
+        if (result.success === false) {
+          this.setData({
+            activities: [],
+            loading: false,
+            errorMsg: result.message || '活动加载失败'
+          })
+          return
+        }
+        this.setData({
+          activities: Array.isArray(result.activities) ? result.activities : [],
+          loading: false,
+          errorMsg: ''
+        })
       },
-      fail(err) {
+      fail: (err) => {
         console.error('加载活动失败', err)
-        wx.showToast({ title: '加载失败', icon: 'none' })
+        this.setData({
+          activities: [],
+          loading: false,
+          errorMsg: '网络异常，请稍后重试'
+        })
       }
     })
   },

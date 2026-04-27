@@ -103,6 +103,54 @@ Page({
     })
   },
 
+  logout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确认退出当前账号吗？',
+      success: (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '退出中...' })
+        wx.cloud.callFunction({
+          name: 'logout',
+          success: (resp) => {
+            wx.hideLoading()
+            if (resp.result && resp.result.success) {
+              const app = getApp()
+              if (app && app.globalData) {
+                app.globalData.userInfo = null
+                app.globalData.isAdmin = false
+              }
+              this.setData({
+                isBound: false,
+                userStatus: 'inactive',
+                userInfo: null,
+                remainingCount: 0,
+                reservations: []
+              })
+              wx.showToast({
+                title: '已退出',
+                icon: 'success'
+              })
+            } else {
+              wx.showToast({
+                title: (resp.result && resp.result.message) || '退出失败',
+                icon: 'none'
+              })
+            }
+          },
+          fail: (err) => {
+            wx.hideLoading()
+            console.error('退出失败', err)
+            wx.showToast({
+              title: '退出失败',
+              icon: 'none'
+            })
+          }
+        })
+      }
+    })
+  },
+
   formatStatus(status) {
     if (status === 'pending') return '待使用'
     if (status === 'completed') return '已完成'
@@ -130,6 +178,7 @@ Page({
               if (resp.result.success) {
                 wx.showToast({ title: '取消成功', icon: 'success' })
                 that.loadReservations()
+                that.checkUserStatus()
               } else {
                 wx.showToast({ title: resp.result.message || '取消失败', icon: 'none' })
               }

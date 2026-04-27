@@ -145,5 +145,37 @@ Page({
         wx.showToast({ title: '更新失败', icon: 'none' })
       }
     })
+  },
+
+  resetPassword(e) {
+    const userId = e.currentTarget.dataset.userid
+    if (!userId) return
+    const that = this
+    wx.showModal({
+      title: '重置密码',
+      content: '确认重置该用户密码为手机号后6位吗？',
+      success(res) {
+        if (!res.confirm) return
+        wx.showLoading({ title: '重置中...' })
+        wx.cloud.callFunction({
+          name: 'serviceFunctions',
+          data: { action: 'resetUserPassword', userId },
+          success(resp) {
+            wx.hideLoading()
+            if (resp.result && resp.result.success) {
+              wx.showToast({ title: '重置成功', icon: 'success' })
+              that.loadUsers()
+            } else {
+              wx.showToast({ title: (resp.result && resp.result.message) || '重置失败', icon: 'none' })
+            }
+          },
+          fail(err) {
+            wx.hideLoading()
+            console.error('重置密码失败', err)
+            wx.showToast({ title: '重置失败', icon: 'none' })
+          }
+        })
+      }
+    })
   }
 })

@@ -25,6 +25,22 @@
       </view>
       <text class="setting-fixed">每周六 22:00</text>
     </view>
+    <view class="divider"></view>
+    <view class="room-setting-wrap">
+      <text class="setting-label">会议室名称</text>
+      <text class="setting-desc">可修改，至少保留 1 个，不可重复</text>
+      <view wx:for="{{room_names}}" wx:key="index" class="room-input-row">
+        <text class="room-index">会议室{{index + 1}}</text>
+        <input
+          class="room-input"
+          maxlength="20"
+          placeholder="请输入会议室名称"
+          value="{{item}}"
+          data-index="{{index}}"
+          bindinput="bindRoomNameChange"
+        />
+      </view>
+    </view>
     <button class="save-btn" bindtap="saveSettings">保存设置</button>
   </view>
 
@@ -36,7 +52,7 @@
     <view class="danger-item">
       <view>
         <text class="danger-label">立即重置本周次数</text>
-        <text class="danger-desc">将所有用户本周次数重置为默认值</text>
+        <text class="danger-desc">仅重置已使用次数，保留额外派发次数</text>
       </view>
       <button class="reset-btn" bindtap="refreshWeeklyCounts">立即重置</button>
     </view>
