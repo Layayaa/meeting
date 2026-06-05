@@ -8,7 +8,7 @@
 .input { height: 74rpx; background: #f9fafb; border: 2rpx solid #e5e7eb; border-radius: 10rpx; padding: 0 14rpx; font-size: 26rpx; }
 .textarea { width: 100%; height: 240rpx; background: #f9fafb; border: 2rpx solid #e5e7eb; border-radius: 10rpx; padding: 14rpx; box-sizing: border-box; font-size: 26rpx; }
 .status-row { display: flex; gap: 10rpx; }
-.status { flex: 1; text-align: center; height: 64rpx; line-height: 64rpx; border-radius: 10rpx; background: #e5e7eb; color: #4b5563; }
+.status { display: flex; align-items: center; justify-content: center; flex: 1; height: 64rpx; border-radius: 10rpx; background: #e5e7eb; color: #4b5563; }
 .status.active { background: #2563eb; color: #fff; }
 .btn-row { display: flex; gap: 10rpx; margin-top: 20rpx; }
 .draft { flex: 1; background: #e5e7eb; color: #374151; border-radius: 10rpx; border: none; }

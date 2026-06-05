@@ -1,15 +1,103 @@
 ﻿<!-- pages/admin/admin.wxml -->
 <view class="page">
   <view class="hero">
-    <view class="hero-icon">⚙️</view>
-    <text class="hero-title">管理员控制台</text>
-    <text class="hero-sub">管理用户、预约与活动</text>
+    <view class="hero-head">
+      <view>
+        <text class="hero-kicker">会议室资源管理</text>
+        <text class="hero-title">运行态势看板</text>
+      </view>
+      <button class="refresh-btn hero-refresh" size="mini" loading="{{dashboardLoading}}" bindtap="loadDashboardStats">刷新</button>
+    </view>
+    <text class="hero-sub">本周 {{dashboardStats.weekRange.start}} 至 {{dashboardStats.weekRange.end}}</text>
+    <view class="hero-metrics">
+      <view class="hero-metric primary">
+        <text class="metric-value">{{dashboardStats.totalReservations}}</text>
+        <text class="metric-label">本周预约总数</text>
+      </view>
+      <view class="hero-metric">
+        <text class="metric-value small">{{dashboardStats.topRoomText || '--'}}</text>
+        <text class="metric-label">使用最高会议室</text>
+      </view>
+      <view class="hero-metric">
+        <text class="metric-value small">{{dashboardStats.topSlotText || '--'}}</text>
+        <text class="metric-label">高峰时段</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="dashboard">
+    <view class="dashboard-head">
+      <view>
+        <text class="section-title">数据分析</text>
+        <text class="section-sub">会议室预约、用户活跃与高峰时段统计</text>
+      </view>
+    </view>
+
+    <view wx:if="{{dashboardError}}" class="dashboard-error">{{dashboardError}}</view>
+
+    <view class="stats-grid">
+      <view class="stats-panel">
+        <view class="panel-title-row">
+          <text class="panel-title">会议室使用率</text>
+        </view>
+        <view wx:if="{{dashboardStats.roomUsage.length}}">
+          <view wx:for="{{dashboardStats.roomUsage}}" wx:key="room" class="usage-row">
+            <view class="row-meta">
+              <text class="row-name">{{item.room}}</text>
+              <text class="row-value">{{item.count}}次 · {{item.percent}}%</text>
+            </view>
+            <view class="progress-track">
+              <view class="progress-fill room-fill" style="{{item.widthStyle}}"></view>
+            </view>
+          </view>
+        </view>
+        <view wx:else class="empty-text">暂无会议室使用数据</view>
+      </view>
+
+      <view class="stats-panel">
+        <view class="panel-title-row">
+          <text class="panel-title">活跃用户 Top5</text>
+        </view>
+        <view wx:if="{{dashboardStats.activeUsers.length}}">
+          <view wx:for="{{dashboardStats.activeUsers}}" wx:key="name" class="rank-row">
+            <view class="rank-badge">{{index + 1}}</view>
+            <view class="rank-user">
+              <text class="row-name">{{item.name}}</text>
+              <text class="row-sub">尾号 {{item.phoneTail}}</text>
+            </view>
+            <text class="rank-count">{{item.count}}次</text>
+          </view>
+        </view>
+        <view wx:else class="empty-text">暂无活跃用户数据</view>
+      </view>
+
+      <view class="stats-panel peak-panel">
+        <view class="panel-title-row">
+          <text class="panel-title">预约高峰时段</text>
+        </view>
+        <view wx:if="{{dashboardStats.peakSlots.length}}" class="bar-chart">
+          <view wx:for="{{dashboardStats.peakSlots}}" wx:key="timeSlot" class="bar-row">
+            <text class="bar-label">{{item.timeSlot}}</text>
+            <view class="bar-track">
+              <view class="bar-fill" style="{{item.widthStyle}}"></view>
+            </view>
+            <text class="bar-count">{{item.count}}</text>
+          </view>
+        </view>
+        <view wx:else class="empty-text">暂无高峰时段数据</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="menu-section-head">
+    <text class="section-title">管理事项</text>
+    <text class="section-sub">用户、预约、公告、反馈与规则配置</text>
   </view>
 
   <view class="menu-list">
     <view class="menu-item" bindtap="goUserManage">
       <view class="menu-left">
-        <view class="menu-icon-wrap blue"><text class="menu-emoji">👥</text></view>
+        <view class="menu-icon-wrap blue"><text class="menu-code">用户</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">用户管理</text>
           <text class="menu-desc">添加用户、调整次数、禁用账号</text>
@@ -20,7 +108,7 @@
 
     <view class="menu-item" bindtap="goReservationManage">
       <view class="menu-left">
-        <view class="menu-icon-wrap purple"><text class="menu-emoji">📋</text></view>
+        <view class="menu-icon-wrap cyan"><text class="menu-code">预约</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">预约管理</text>
           <text class="menu-desc">查看所有预约、强制取消</text>
@@ -31,7 +119,7 @@
 
     <view class="menu-item" bindtap="goActivityManage">
       <view class="menu-left">
-        <view class="menu-icon-wrap green"><text class="menu-emoji">🎉</text></view>
+        <view class="menu-icon-wrap green"><text class="menu-code">活动</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">活动管理</text>
           <text class="menu-desc">发布、编辑、删除活动</text>
@@ -42,7 +130,7 @@
 
     <view class="menu-item" bindtap="goFeedbackManage">
       <view class="menu-left">
-        <view class="menu-icon-wrap yellow"><text class="menu-emoji">💬</text></view>
+        <view class="menu-icon-wrap yellow"><text class="menu-code">反馈</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">反馈管理</text>
           <text class="menu-desc">查看用户反馈并回复</text>
@@ -53,7 +141,7 @@
 
     <view class="menu-item" bindtap="goNoticeManage">
       <view class="menu-left">
-        <view class="menu-icon-wrap red"><text class="menu-emoji">📢</text></view>
+        <view class="menu-icon-wrap red"><text class="menu-code">公告</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">通知管理</text>
           <text class="menu-desc">新建、发布、管理通知公告</text>
@@ -64,7 +152,7 @@
 
     <view class="menu-item" bindtap="goSettings">
       <view class="menu-left">
-        <view class="menu-icon-wrap orange"><text class="menu-emoji">🔧</text></view>
+        <view class="menu-icon-wrap gold"><text class="menu-code">规则</text></view>
         <view class="menu-text-wrap">
           <text class="menu-label">次数规则设置</text>
           <text class="menu-desc">配置每周预约次数</text>

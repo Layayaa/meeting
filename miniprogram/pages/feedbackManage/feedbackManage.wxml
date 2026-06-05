@@ -1,4 +1,10 @@
-﻿<view class="page">
+<view class="page">
+  <view class="module-hero">
+    <text class="module-kicker">服务响应管理</text>
+    <text class="module-title">反馈管理</text>
+    <text class="module-desc">跟踪用户反馈状态，及时完成处理回复</text>
+  </view>
+
   <view class="tabs">
     <view class="tab {{status==='all'?'active':''}}" data-status="all" bindtap="selectStatus">全部</view>
     <view class="tab {{status==='pending'?'active':''}}" data-status="pending" bindtap="selectStatus">待回复</view>

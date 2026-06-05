@@ -9,7 +9,7 @@
 
   <!-- Empty -->
   <view wx:elif="{{!notices.length}}" class="state-wrap">
-    <text class="state-icon">📭</text>
+    <text class="state-icon">暂无</text>
     <text class="state-text">暂无通知公告</text>
   </view>
 

@@ -3,7 +3,7 @@
 
   <!-- 未登录 -->
   <view wx:if="{{!isBound}}" class="empty-page">
-    <text class="empty-emoji">🔒</text>
+    <text class="empty-mark">未登</text>
     <text class="empty-title">请先登录</text>
     <text class="empty-desc">登录后可查看预约记录和个人信息</text>
     <button class="login-btn" bindtap="goLogin">去登录 / 注册</button>
@@ -11,9 +11,9 @@
 
   <!-- 已禁用 -->
   <view wx:elif="{{userStatus === 'disabled'}}" class="empty-page">
-    <text class="empty-emoji">🚫</text>
+    <text class="empty-mark danger">禁用</text>
     <text class="empty-title">账户已被禁用</text>
-    <text class="empty-desc">请联系管理员处理后再使用</text>
+    <text class="empty-desc">请联系处理人员处理后再使用</text>
   </view>
 
   <!-- 管理员视图 -->
@@ -34,49 +34,89 @@
 
     <!-- 管理功能 -->
     <view class="section-label">管理功能</view>
+    <view class="admin-dashboard">
+      <view class="dashboard-head">
+        <view>
+          <text class="dashboard-title">本周统计</text>
+          <text class="dashboard-sub">{{dashboardStats.weekRange.start}} 至 {{dashboardStats.weekRange.end}}</text>
+        </view>
+        <text class="dashboard-link" bindtap="goAdmin">详情</text>
+      </view>
+      <view class="dashboard-main">
+        <view class="dashboard-total">
+          <text class="dashboard-total-num">{{dashboardStats.totalReservations}}</text>
+          <text class="dashboard-total-label">预约总次数</text>
+        </view>
+        <view class="dashboard-side">
+          <view class="dashboard-mini">
+            <text class="dashboard-mini-val">{{dashboardStats.topRoomText}}</text>
+            <text class="dashboard-mini-key">使用最高会议室</text>
+          </view>
+          <view class="dashboard-mini">
+            <text class="dashboard-mini-val">{{dashboardStats.topSlotText}}</text>
+            <text class="dashboard-mini-key">高峰时段</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <view class="menu-group">
       <view class="menu-row divider" bindtap="goUserManage">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap blue"><text class="menu-emoji">👥</text></view>
+          <view class="menu-icon-wrap blue"><text class="menu-code">用户</text></view>
           <text class="menu-text">用户管理</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-row divider" bindtap="goReservationManage">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap purple"><text class="menu-emoji">📋</text></view>
+          <view class="menu-icon-wrap cyan"><text class="menu-code">预约</text></view>
           <text class="menu-text">预约管理</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-row divider" bindtap="goFeedbackManage">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap yellow"><text class="menu-emoji">💬</text></view>
+          <view class="menu-icon-wrap yellow"><text class="menu-code">反馈</text></view>
           <text class="menu-text">反馈管理</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-row divider" bindtap="goNoticeManage">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap red"><text class="menu-emoji">📢</text></view>
+          <view class="menu-icon-wrap red"><text class="menu-code">公告</text></view>
           <text class="menu-text">通知管理</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-row divider" bindtap="goActivityManage">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap green"><text class="menu-emoji">🎉</text></view>
+          <view class="menu-icon-wrap green"><text class="menu-code">活动</text></view>
           <text class="menu-text">活动管理</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-row" bindtap="goSettings">
+      <view class="menu-row divider" bindtap="goSettings">
         <view class="menu-row-left">
-          <view class="menu-icon-wrap orange"><text class="menu-emoji">🔧</text></view>
+          <view class="menu-icon-wrap gold"><text class="menu-code">规则</text></view>
           <text class="menu-text">次数规则设置</text>
         </view>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-row" bindtap="togglePasswordForm">
+        <view class="menu-row-left">
+          <view class="menu-icon-wrap blue"><text class="menu-code">密码</text></view>
+          <text class="menu-text">修改密码</text>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view wx:if="{{showPasswordForm}}" class="password-panel">
+      <input class="password-input" password="true" placeholder="当前密码" data-key="oldPassword" value="{{passwordForm.oldPassword}}" bindinput="bindPasswordInput" />
+      <input class="password-input" password="true" placeholder="新密码（至少6位）" data-key="newPassword" value="{{passwordForm.newPassword}}" bindinput="bindPasswordInput" />
+      <input class="password-input" password="true" placeholder="确认新密码" data-key="confirmPassword" value="{{passwordForm.confirmPassword}}" bindinput="bindPasswordInput" />
+      <button class="password-submit" loading="{{passwordSubmitting}}" bindtap="submitChangePassword">确认修改</button>
     </view>
 
   </view>
@@ -116,7 +156,7 @@
     <view class="section-label">我的预约</view>
 
     <view wx:if="{{!reservations.length}}" class="list-empty">
-      <text class="list-empty-icon">📅</text>
+      <text class="list-empty-icon">暂无</text>
       <text class="list-empty-text">暂无预约记录</text>
     </view>
 
@@ -144,10 +184,21 @@
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-row" bindtap="goMyFeedbacks">
+      <view class="menu-row divider" bindtap="goMyFeedbacks">
         <text class="menu-text">我的反馈</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-row" bindtap="togglePasswordForm">
+        <text class="menu-text">修改密码</text>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view wx:if="{{showPasswordForm}}" class="password-panel">
+      <input class="password-input" password="true" placeholder="当前密码" data-key="oldPassword" value="{{passwordForm.oldPassword}}" bindinput="bindPasswordInput" />
+      <input class="password-input" password="true" placeholder="新密码（至少6位）" data-key="newPassword" value="{{passwordForm.newPassword}}" bindinput="bindPasswordInput" />
+      <input class="password-input" password="true" placeholder="确认新密码" data-key="confirmPassword" value="{{passwordForm.confirmPassword}}" bindinput="bindPasswordInput" />
+      <button class="password-submit" loading="{{passwordSubmitting}}" bindtap="submitChangePassword">确认修改</button>
     </view>
 
   </view>

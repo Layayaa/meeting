@@ -1,5 +1,11 @@
 <!-- pages/reservationManage/reservationManage.wxml -->
 <view class="page">
+  <view class="module-hero">
+    <text class="module-kicker">会议资源调度记录</text>
+    <text class="module-title">预约记录管理</text>
+    <text class="module-desc">支持按日期、会议室和预约人筛选管理</text>
+  </view>
+
   <!-- Filter Card -->
   <view class="filter-card">
     <view class="filter-title">筛选条件</view>
@@ -21,7 +27,7 @@
         <input class="filter-input" placeholder="输入姓名" bindinput="bindUserNameChange" value="{{filterUserName}}" />
       </view>
     </view>
-    <button class="search-btn" bindtap="search">🔍 搜索预约</button>
+    <button class="search-btn" bindtap="search">搜索预约</button>
   </view>
 
   <!-- Results -->
@@ -41,7 +47,7 @@
   </view>
 
   <view wx:if="{{!displayReservations.length}}" class="empty-state">
-    <text class="empty-icon">📋</text>
+    <text class="empty-icon">暂无</text>
     <text class="empty-text">暂无预约记录</text>
   </view>
 
@@ -54,15 +60,15 @@
     </view>
     <view class="card-body">
       <view class="info-row">
-        <text class="info-icon">🏢</text>
+        <text class="info-icon">会议</text>
         <text class="info-text">{{item.room}}</text>
       </view>
       <view class="info-row">
-        <text class="info-icon">📅</text>
+        <text class="info-icon">日期</text>
         <text class="info-text">{{item.date}} &nbsp; {{item.time_slot}}</text>
       </view>
       <view class="info-row" wx:if="{{item.purpose}}">
-        <text class="info-icon">📝</text>
+        <text class="info-icon">用途</text>
         <text class="info-text">{{item.purpose}}</text>
       </view>
     </view>

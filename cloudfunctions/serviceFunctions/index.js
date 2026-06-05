@@ -8,7 +8,39 @@ cloud.init({
 
 const db = cloud.database()
 const _ = db.command
-const DEFAULT_SETTINGS = { weekly_default: 1, reset_time: '22:00', reset_day: 6 }
+const DEFAULT_SETTINGS = {
+  weekly_default: 1,
+  reset_time: '22:00',
+  reset_day: 6,
+  contact_wechat: '',
+  contact_email: '3963632979@qq.com',
+  contact_qr_image: '/images/contact/oacend-wechat.jpg',
+  contact_subject_hint: '项目名称+联系人姓名+电话'
+}
+const LOCK_COLLECTION = 'reservation_locks'
+const DEFAULT_ROOM_IMAGES = [
+  '/images/rooms/room-1.svg',
+  '/images/rooms/room-2.svg',
+  '/images/rooms/room-3.svg'
+]
+
+function createReservationLockId(date, room, timeSlot) {
+  return crypto
+    .createHash('sha1')
+    .update(`${date}|${room}|${timeSlot}`)
+    .digest('hex')
+}
+
+function isDuplicateKeyError(error) {
+  const message = String(error && (error.message || error.errMsg) || '')
+  return message.includes('duplicate') || message.includes('already exists') || message.includes('E11000')
+}
+
+function isLockCollectionUnavailable(error) {
+  const code = error && (error.errCode || error.code)
+  const message = String(error && (error.message || error.errMsg) || '')
+  return code === -501001 || code === -502005 || message.includes(LOCK_COLLECTION) || message.includes('collection')
+}
 const DEFAULT_ROOMS = ['会议室A', '会议室B', '会议室C']
 
 function normalizePhone(value) {
@@ -28,6 +60,16 @@ function createPasswordRecord(password) {
     password_salt: salt,
     password_hash: hashPassword(password, salt)
   }
+}
+
+function verifyPassword(user, password) {
+  if (user.password_hash && user.password_salt) {
+    return hashPassword(password, user.password_salt) === user.password_hash
+  }
+  if (typeof user.password === 'string' && user.password.length > 0) {
+    return user.password === password
+  }
+  return false
 }
 
 function getDefaultPasswordByPhone(phone) {
@@ -66,6 +108,26 @@ function formatDate(date) {
   return `${y}-${m}-${d}`
 }
 
+function getCurrentWeekRange() {
+  const now = new Date()
+  const start = new Date(now)
+  const day = start.getDay()
+  const diffToMonday = day === 0 ? -6 : 1 - day
+  start.setDate(start.getDate() + diffToMonday)
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+  end.setHours(23, 59, 59, 999)
+
+  return {
+    start,
+    end,
+    startText: formatDate(start),
+    endText: formatDate(end)
+  }
+}
+
 function normalizeInt(v, fallback = 0) {
   const n = Number(v)
   if (!Number.isFinite(n)) return fallback
@@ -84,6 +146,202 @@ function normalizeRoomNames(roomNames) {
     }
   })
   return unique.length > 0 ? unique : DEFAULT_ROOMS
+}
+
+function normalizeRoomDetails(roomDetails, roomNames) {
+  const names = normalizeRoomNames(roomNames)
+  const source = Array.isArray(roomDetails) ? roomDetails : []
+  const byName = {}
+  source.forEach((item) => {
+    const name = String((item && item.name) || '').trim()
+    if (name) byName[name] = item
+  })
+  return names.map((name, index) => {
+    const detail = byName[name] || source[index] || {}
+    const capacity = normalizeInt(detail.capacity, index === 0 ? 8 : index === 1 ? 12 : 6)
+    const equipmentText = String(detail.equipmentText || detail.equipment || '').trim()
+    return {
+      name,
+      image: String(detail.image || DEFAULT_ROOM_IMAGES[index % DEFAULT_ROOM_IMAGES.length]),
+      capacity: capacity > 0 ? capacity : 6,
+      equipmentText: equipmentText || '投影仪、白板、视频会议'
+    }
+  })
+}
+
+function maskPhoneTail(phone) {
+  const digits = normalizePhone(phone)
+  return digits.length >= 4 ? digits.slice(-4) : '--'
+}
+
+async function fetchReservationsByDateRange(startText, endText) {
+  const pageSize = 100
+  let skip = 0
+  const all = []
+
+  while (true) {
+    const res = await db.collection('reservations')
+      .where({
+        date: _.gte(startText).and(_.lte(endText))
+      })
+      .skip(skip)
+      .limit(pageSize)
+      .get()
+    const batch = res.data || []
+    all.push(...batch)
+    if (batch.length < pageSize) break
+    skip += pageSize
+  }
+
+  return all
+}
+
+function buildDashboardStats(reservations, settings, weekRange) {
+  const effectiveReservations = reservations.filter((item) => item.status !== 'cancelled')
+  const rooms = normalizeRoomNames(settings.room_names)
+  const roomMap = new Map(rooms.map((room) => [room, 0]))
+  const userMap = new Map()
+  const slotMap = new Map()
+
+  effectiveReservations.forEach((item) => {
+    const room = item.room || '未设置会议室'
+    roomMap.set(room, (roomMap.get(room) || 0) + 1)
+
+    const userKey = item.user_id || item.openid || item.user_phone || item.user_name || 'unknown'
+    const currentUser = userMap.get(userKey) || {
+      name: item.user_name || '未知用户',
+      phoneTail: maskPhoneTail(item.user_phone),
+      count: 0
+    }
+    currentUser.count += 1
+    userMap.set(userKey, currentUser)
+
+    const slot = item.time_slot || '未设置时段'
+    slotMap.set(slot, (slotMap.get(slot) || 0) + 1)
+  })
+
+  const total = effectiveReservations.length
+  const roomUsage = Array.from(roomMap.entries())
+    .map(([room, count]) => ({
+      room,
+      count,
+      percent: total > 0 ? Math.round((count / total) * 100) : 0,
+      widthStyle: `width: ${total > 0 ? Math.round((count / total) * 100) : 0}%;`
+    }))
+    .sort((a, b) => b.count - a.count)
+
+  const activeUsers = Array.from(userMap.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+
+  const maxSlotCount = Math.max(1, ...Array.from(slotMap.values()))
+  const peakSlots = Array.from(slotMap.entries())
+    .map(([timeSlot, count]) => ({
+      timeSlot,
+      count,
+      percent: Math.round((count / maxSlotCount) * 100),
+      widthStyle: `width: ${Math.round((count / maxSlotCount) * 100)}%;`
+    }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count
+      return a.timeSlot > b.timeSlot ? 1 : -1
+    })
+    .slice(0, 8)
+
+  return {
+    weekRange: {
+      start: weekRange.startText,
+      end: weekRange.endText
+    },
+    totalReservations: total,
+    roomUsage,
+    activeUsers,
+    peakSlots,
+    topRoomText: roomUsage[0] ? roomUsage[0].room : '--',
+    topSlotText: peakSlots[0] ? peakSlots[0].timeSlot : '--'
+  }
+}
+
+function buildTimeSlots() {
+  const slots = []
+  for (let hour = 8; hour < 22; hour++) {
+    const start = `${String(hour).padStart(2, '0')}:00`
+    const end = `${String(hour + 1).padStart(2, '0')}:00`
+    slots.push(`${start}-${end}`)
+  }
+  return slots
+}
+
+function buildNextSevenDates() {
+  const today = new Date()
+  const weekNames = ['日', '一', '二', '三', '四', '五', '六']
+  return Array.from({ length: 7 }).map((_, index) => {
+    const date = new Date(today)
+    date.setDate(today.getDate() + index)
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    return {
+      date: formatDate(date),
+      dayLabel: index === 0 ? '今天' : index === 1 ? '明天' : `周${weekNames[date.getDay()]}`,
+      monthDay: `${month}/${day}`
+    }
+  })
+}
+
+function buildWeeklyAvailability(reservations, settings) {
+  const rooms = normalizeRoomNames(settings.room_names)
+  const totalRooms = rooms.length
+  const dates = buildNextSevenDates()
+  const slots = buildTimeSlots()
+  const pendingReservations = reservations.filter((item) => item.status === 'pending')
+  const now = new Date()
+
+  const rows = slots.map((timeSlot) => ({
+    timeSlot,
+    cells: dates.map((dateItem) => {
+      const occupiedRooms = pendingReservations
+        .filter((item) => item.date === dateItem.date && item.time_slot === timeSlot)
+        .map((item) => item.room)
+        .filter(Boolean)
+      const uniqueOccupiedRooms = Array.from(new Set(occupiedRooms))
+      const availableRooms = rooms.filter((room) => !uniqueOccupiedRooms.includes(room))
+      const occupiedCount = uniqueOccupiedRooms.length
+      const slotStart = parseReservationDateTime(dateItem.date, timeSlot)
+      const isExpired = !!slotStart && slotStart <= now
+      const status = isExpired
+        ? 'expired'
+        : occupiedCount >= totalRooms
+          ? 'full'
+          : occupiedCount > 0
+            ? 'partial'
+            : 'free'
+      const statusText = isExpired
+        ? '过期'
+        : occupiedCount >= totalRooms
+          ? '已满'
+          : occupiedCount > 0
+            ? `${availableRooms.length}空`
+            : '空闲'
+      return {
+        date: dateItem.date,
+        timeSlot,
+        status,
+        className: `availability-cell ${status}`,
+        statusText,
+        occupiedCount,
+        availableCount: isExpired ? 0 : availableRooms.length,
+        totalRooms,
+        availableRooms
+      }
+    })
+  }))
+
+  return {
+    dates,
+    slots,
+    rows,
+    rooms
+  }
 }
 
 function getWeekDefault(user, settings) {
@@ -109,13 +367,13 @@ function getSlotStartMinute(timeSlot) {
   return hour * 60 + minute
 }
 
-function isSameOrAdjacentTimeSlot(a, b) {
+function isAdjacentTimeSlot(a, b) {
   const ma = getSlotStartMinute(a)
   const mb = getSlotStartMinute(b)
   if (ma === null || mb === null) {
     return false
   }
-  return Math.abs(ma - mb) <= 60
+  return Math.abs(ma - mb) === 60
 }
 
 function mapReservationStatus(status) {
@@ -135,13 +393,19 @@ async function getSettings() {
   const settingsRes = await db.collection('settings').where({ key: 'weekly_settings' }).get()
   const settings = settingsRes.data[0] || DEFAULT_SETTINGS
   const rooms = normalizeRoomNames(settings.room_names)
+  const roomDetails = normalizeRoomDetails(settings.room_details, rooms)
   return {
     _id: settings._id,
     weekly_default: normalizeInt(settings.weekly_default, DEFAULT_SETTINGS.weekly_default),
     reset_time: settings.reset_time || DEFAULT_SETTINGS.reset_time,
     reset_day: typeof settings.reset_day === 'number' ? settings.reset_day : DEFAULT_SETTINGS.reset_day,
     rooms,
-    room_names: rooms
+    room_names: rooms,
+    room_details: roomDetails,
+    contact_wechat: String(settings.contact_wechat || DEFAULT_SETTINGS.contact_wechat).trim(),
+    contact_email: String(settings.contact_email || DEFAULT_SETTINGS.contact_email).trim(),
+    contact_qr_image: String(settings.contact_qr_image || DEFAULT_SETTINGS.contact_qr_image).trim(),
+    contact_subject_hint: String(settings.contact_subject_hint || DEFAULT_SETTINGS.contact_subject_hint).trim()
   }
 }
 
@@ -243,11 +507,97 @@ async function validateUserCanReserve(user, settings, reservationPayload) {
     date,
     status: 'pending'
   }).get()
-  const hasAdjacent = myPendingRes.data.some((item) => isSameOrAdjacentTimeSlot(item.time_slot, time_slot))
+  const hasAdjacent = myPendingRes.data.some((item) => isAdjacentTimeSlot(item.time_slot, time_slot))
   if (hasAdjacent) {
     return { ok: false, message: '同一账号不能预约连续时段' }
   }
   return { ok: true }
+}
+
+async function createReservationInTransaction({ user, settings, openid, date, room, timeSlot, purpose }) {
+  const lockId = createReservationLockId(date, room, timeSlot)
+  const transaction = await db.startTransaction()
+
+  try {
+    try {
+      await transaction.collection(LOCK_COLLECTION).add({
+        data: {
+          _id: lockId,
+          date,
+          room,
+          time_slot: timeSlot,
+          openid,
+          status: 'pending',
+          created_at: new Date()
+        }
+      })
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        throw error
+      }
+      if (!isLockCollectionUnavailable(error)) {
+        throw error
+      }
+      console.warn('reservation lock skipped', error)
+    }
+
+    const conflictRes = await transaction.collection('reservations').where({
+      date,
+      room,
+      time_slot: timeSlot,
+      status: 'pending'
+    }).get()
+    if (conflictRes.data.length > 0) {
+      throw new Error('该时段已被预约')
+    }
+
+    const latestUserRes = await transaction.collection('users').doc(user._id).get()
+    const latestUser = latestUserRes.data
+    if (!latestUser || latestUser.status !== 'active') {
+      throw new Error('账户当前不可预约')
+    }
+    if (calcRemainingCount(latestUser, settings) <= 0) {
+      throw new Error('本周预约次数已用完')
+    }
+
+    const myPendingRes = await transaction.collection('reservations').where({
+      openid,
+      date,
+      status: 'pending'
+    }).get()
+    const hasAdjacent = myPendingRes.data.some((item) => isAdjacentTimeSlot(item.time_slot, timeSlot))
+    if (hasAdjacent) {
+      throw new Error('同一账号不能预约连续时段')
+    }
+
+    const addRes = await transaction.collection('reservations').add({
+      data: {
+        user_id: user._id,
+        openid,
+        user_name: user.name,
+        user_phone: user.phone,
+        date,
+        room,
+        time_slot: timeSlot,
+        lock_id: lockId,
+        purpose: purpose || '',
+        status: 'pending',
+        created_at: new Date()
+      }
+    })
+
+    await transaction.collection('users').doc(user._id).update({
+      data: {
+        used_count: _.inc(1)
+      }
+    })
+
+    await transaction.commit()
+    return addRes
+  } catch (error) {
+    await transaction.rollback()
+    throw error
+  }
 }
 
 async function reserveRoomCore({ openid, date, room, timeSlot, purpose }) {
@@ -264,28 +614,68 @@ async function reserveRoomCore({ openid, date, room, timeSlot, purpose }) {
   if (!check.ok) {
     return { success: false, message: check.message }
   }
-  const reservationData = {
-    user_id: user._id,
-    openid,
-    user_name: user.name,
-    user_phone: user.phone,
-    date,
-    room,
-    time_slot: timeSlot,
-    purpose: purpose || '',
-    status: 'pending',
-    created_at: new Date()
-  }
-  const addRes = await db.collection('reservations').add({ data: reservationData })
-  await db.collection('users').doc(user._id).update({
-    data: {
-      used_count: _.inc(1)
+  try {
+    const createdReservation = await createReservationInTransaction({
+      user,
+      settings,
+      openid,
+      date,
+      room,
+      timeSlot,
+      purpose
+    })
+    return {
+      success: true,
+      reservationId: createdReservation._id,
+      message: '预约成功'
     }
-  })
-  return {
-    success: true,
-    reservationId: addRes._id,
-    message: '预约成功'
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      return { success: false, message: '该时段已被预约' }
+    }
+    return { success: false, message: error.message || '预约失败，请重试' }
+  }
+}
+
+async function cancelReservationInTransaction({ reservationId, reservation, cancelledBy, extraData = {} }) {
+  const transaction = await db.startTransaction()
+  const now = new Date()
+  const lockId = reservation.lock_id || createReservationLockId(reservation.date, reservation.room, reservation.time_slot)
+
+  try {
+    const latestReservationRes = await transaction.collection('reservations').doc(reservationId).get()
+    const latestReservation = latestReservationRes.data
+    if (!latestReservation || latestReservation.status !== 'pending') {
+      throw new Error('该预约无法取消')
+    }
+
+    await transaction.collection('reservations').doc(reservationId).update({
+      data: {
+        status: 'cancelled',
+        cancelled_at: now,
+        cancelled_by: cancelledBy,
+        ...extraData
+      }
+    })
+
+    if (latestReservation.user_id) {
+      await transaction.collection('users').doc(latestReservation.user_id).update({
+        data: {
+          used_count: _.inc(-1)
+        }
+      })
+    }
+
+    try {
+      await transaction.collection(LOCK_COLLECTION).doc(lockId).remove()
+    } catch (error) {
+      console.warn('release reservation lock failed', error)
+    }
+
+    await transaction.commit()
+  } catch (error) {
+    await transaction.rollback()
+    throw error
   }
 }
 
@@ -363,20 +753,11 @@ exports.main = async (event) => {
       if (diffHour <= 2) {
         return { success: false, message: '已过取消时限' }
       }
-      await db.collection('reservations').doc(reservationId).update({
-        data: {
-          status: 'cancelled',
-          cancelled_at: now,
-          cancelled_by: 'user'
-        }
+      await cancelReservationInTransaction({
+        reservationId,
+        reservation,
+        cancelledBy: 'user'
       })
-      if (reservation.user_id) {
-        await db.collection('users').doc(reservation.user_id).update({
-          data: {
-            used_count: _.inc(-1)
-          }
-        })
-      }
       return { success: true, message: '取消成功' }
     }
 
@@ -607,6 +988,20 @@ exports.main = async (event) => {
       return { success: true, users }
     }
 
+    if (action === 'getDashboardStats') {
+      const adminInfo = await getAdminInfoByOpenid(openid)
+      if (!adminInfo.isAdmin) {
+        return { success: false, message: '无权限' }
+      }
+      const settings = await getSettings()
+      const weekRange = getCurrentWeekRange()
+      const reservations = await fetchReservationsByDateRange(weekRange.startText, weekRange.endText)
+      return {
+        success: true,
+        stats: buildDashboardStats(reservations, settings, weekRange)
+      }
+    }
+
     if (action === 'addUser') {
       const adminInfo = await getAdminInfoByOpenid(openid)
       if (!adminInfo.isAdmin) {
@@ -696,6 +1091,35 @@ exports.main = async (event) => {
       return { success: true, message: '更新成功' }
     }
 
+    if (action === 'changePassword') {
+      const user = await getUserByOpenid(openid)
+      if (!user) {
+        return { success: false, message: '请先登录' }
+      }
+      const oldPassword = String(event.oldPassword || '')
+      const newPassword = String(event.newPassword || '')
+      if (oldPassword.length < 6) {
+        return { success: false, message: '请输入当前密码' }
+      }
+      if (newPassword.length < 6) {
+        return { success: false, message: '新密码至少6位' }
+      }
+      if (oldPassword === newPassword) {
+        return { success: false, message: '新密码不能与原密码相同' }
+      }
+      if (!verifyPassword(user, oldPassword)) {
+        return { success: false, message: '当前密码错误' }
+      }
+      await db.collection('users').doc(user._id).update({
+        data: {
+          ...createPasswordRecord(newPassword),
+          password: '',
+          updated_at: new Date()
+        }
+      })
+      return { success: true, message: '密码修改成功' }
+    }
+
     if (action === 'resetUserPassword') {
       const adminInfo = await getAdminInfoByOpenid(openid)
       if (!adminInfo.isAdmin) {
@@ -776,22 +1200,14 @@ exports.main = async (event) => {
       if (reservation.status !== 'pending') {
         return { success: false, message: '该预约不能强制取消' }
       }
-      const now = new Date()
-      await db.collection('reservations').doc(reservationId).update({
-        data: {
-          status: 'cancelled',
-          cancelled_by_admin: true,
-          cancelled_by: 'admin',
-          cancelled_at: now
+      await cancelReservationInTransaction({
+        reservationId,
+        reservation,
+        cancelledBy: 'admin',
+        extraData: {
+          cancelled_by_admin: true
         }
       })
-      if (reservation.user_id) {
-        await db.collection('users').doc(reservation.user_id).update({
-          data: {
-            used_count: _.inc(-1)
-          }
-        })
-      }
       await writeOperationLog({
         type: 'force_cancel_reservation',
         operator_openid: openid,
@@ -841,6 +1257,18 @@ exports.main = async (event) => {
       return { success: true, settings }
     }
 
+    if (action === 'getWeeklyAvailability') {
+      const settings = await getSettings()
+      const dates = buildNextSevenDates()
+      const startText = dates[0].date
+      const endText = dates[dates.length - 1].date
+      const reservations = await fetchReservationsByDateRange(startText, endText)
+      return {
+        success: true,
+        availability: buildWeeklyAvailability(reservations, settings)
+      }
+    }
+
     if (action === 'updateSettings') {
       const adminInfo = await getAdminInfoByOpenid(openid)
       if (!adminInfo.isAdmin) {
@@ -850,6 +1278,11 @@ exports.main = async (event) => {
       const resetTime = String(event.reset_time || DEFAULT_SETTINGS.reset_time)
       const resetDay = normalizeInt(event.reset_day, DEFAULT_SETTINGS.reset_day)
       const roomNames = normalizeRoomNames(event.room_names)
+      const roomDetails = normalizeRoomDetails(event.room_details, roomNames)
+      const contactWechat = String(event.contact_wechat || '').trim()
+      const contactEmail = String(event.contact_email || '').trim()
+      const contactQrImage = String(event.contact_qr_image || '').trim()
+      const contactSubjectHint = String(event.contact_subject_hint || '').trim()
       if (weeklyDefault <= 0) {
         return { success: false, message: '默认次数必须大于0' }
       }
@@ -867,6 +1300,11 @@ exports.main = async (event) => {
             reset_time: resetTime,
             reset_day: resetDay,
             room_names: roomNames,
+            room_details: roomDetails,
+            contact_wechat: contactWechat,
+            contact_email: contactEmail,
+            contact_qr_image: contactQrImage,
+            contact_subject_hint: contactSubjectHint,
             updated_at: new Date()
           }
         })
@@ -878,6 +1316,11 @@ exports.main = async (event) => {
             reset_time: resetTime,
             reset_day: resetDay,
             room_names: roomNames,
+            room_details: roomDetails,
+            contact_wechat: contactWechat,
+            contact_email: contactEmail,
+            contact_qr_image: contactQrImage,
+            contact_subject_hint: contactSubjectHint,
             created_at: new Date()
           }
         })

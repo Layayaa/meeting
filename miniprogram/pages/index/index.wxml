@@ -1,41 +1,64 @@
 <!-- pages/index/index.wxml -->
 <view class="page">
 
-  <!-- Header: 用户信息 -->
-  <view class="header">
-    <view class="header-left">
-      <text class="header-greeting">你好，{{displayName || '访客'}}</text>
-      <text class="header-sub" wx:if="{{userInfo.department}}">{{userInfo.department}}</text>
-      <text class="header-sub" wx:elif="{{!isBound}}">登录后可使用预约功能</text>
+  <!-- 综合工作台 -->
+  <view class="workspace-hero">
+    <view class="hero-top">
+      <view>
+        <text class="hero-kicker">智慧会议室管理</text>
+        <text class="hero-title">综合工作台</text>
+      </view>
+      <view class="hero-badge {{accountStatusClass}}">{{accountStatusText}}</view>
     </view>
-    <view wx:if="{{isAdmin}}" class="admin-tag">管理员</view>
+
+    <view class="hero-user">
+      <view class="hero-avatar">{{avatarText}}</view>
+      <view class="hero-user-main">
+        <text class="hero-greeting">你好，{{displayName || '访客'}}</text>
+        <text class="hero-sub" wx:if="{{userInfo.department}}">{{userInfo.department}} · {{todayDisplay}}</text>
+        <text class="hero-sub" wx:else>{{todayDisplay}} · 会议资源运行中</text>
+      </view>
+      <view wx:if="{{isAdmin}}" class="admin-chip">管理员</view>
+    </view>
+
+    <view class="hero-metrics">
+      <view class="hero-metric primary" bindtap="goReserve">
+        <text class="metric-value {{remainingCount <= 0 ? 'zero' : ''}}">{{isBound ? remainingCount : '--'}}</text>
+        <text class="metric-label">本周可用次数</text>
+      </view>
+      <view class="hero-metric">
+        <text class="metric-value">{{todayFreeCount}}</text>
+        <text class="metric-label">今日空闲会议室</text>
+      </view>
+      <view class="hero-metric">
+        <text class="metric-value">{{todayBusyCount}}</text>
+        <text class="metric-label">今日已占用</text>
+      </view>
+    </view>
+
+    <view class="hero-actions">
+      <view class="hero-action primary" bindtap="goReserve">立即预约</view>
+      <view class="hero-action" bindtap="goMyReservations">我的预约</view>
+      <view class="hero-action" bindtap="goNotices">通知公告</view>
+    </view>
   </view>
 
   <!-- 状态提示（仅异常时显示） -->
   <view wx:if="{{!isBound}}" class="banner banner-warn" bindtap="goLogin">
-    <text class="banner-text">⚠️ 未登录，点击前往登录</text>
+    <text class="banner-text">未登录，点击前往登录后可使用预约功能</text>
     <text class="banner-arrow">›</text>
   </view>
   <view wx:elif="{{userStatus === 'disabled'}}" class="banner banner-danger">
-    <text class="banner-text">🚫 账户已禁用，请联系管理员</text>
-  </view>
-
-  <!-- 本周预约额度（已登录才显示） -->
-  <view wx:if="{{isBound && userStatus === 'active'}}" class="quota-card" bindtap="goReserve">
-    <view class="quota-left">
-      <text class="quota-title">本周可用次数</text>
-      <text class="quota-hint">点击立即预约</text>
-    </view>
-    <view class="quota-right">
-      <text class="quota-num {{remainingCount <= 0 ? 'zero' : ''}}">{{remainingCount}}</text>
-      <text class="quota-unit">次</text>
-    </view>
+    <text class="banner-text">账户已禁用，请联系处理人员处理</text>
   </view>
 
   <!-- 今日会议室状态 -->
   <view class="section">
     <view class="section-header">
-      <text class="section-title">今日会议室</text>
+      <view>
+        <text class="section-title">今日资源状态</text>
+        <text class="section-desc">实时查看会议室占用情况</text>
+      </view>
       <text class="section-sub">{{todayDisplay}}</text>
     </view>
     <view class="room-list">
@@ -61,7 +84,10 @@
   <!-- 最新通知（有通知才显示） -->
   <view wx:if="{{noticePreview || noticePreviewLoading}}" class="section">
     <view class="section-header">
-      <text class="section-title">最新通知</text>
+      <view>
+        <text class="section-title">通知公告</text>
+        <text class="section-desc">单位会议资源使用提醒</text>
+      </view>
       <text class="section-link" bindtap="goNotices">全部 ›</text>
     </view>
     <view class="notice-card" bindtap="openNoticePreview">
@@ -77,11 +103,74 @@
     </view>
   </view>
 
+  <view wx:if="{{contactInfo.visible}}" class="section">
+    <view class="contact-card">
+      <view class="contact-head">
+        <view>
+          <text class="contact-kicker">联系信息</text>
+          <text class="contact-title">项目交流与材料投递</text>
+        </view>
+        <text class="contact-badge">可联系</text>
+      </view>
+      <text class="contact-desc">可扫码添加联系微信；项目介绍材料请发送至下方邮箱，邮件标题按要求填写。</text>
+      <view wx:if="{{contactInfo.qrImage}}" class="contact-qr-wrap" data-src="{{contactInfo.qrImage}}" bindtap="saveContactQr">
+        <image class="contact-qr" mode="aspectFit" src="{{contactInfo.qrImage}}"></image>
+        <view class="contact-qr-text">
+          <text class="contact-qr-tip">扫码添加联系微信</text>
+          <text class="contact-qr-action">点击保存二维码</text>
+        </view>
+      </view>
+      <view class="contact-list">
+        <view wx:if="{{contactInfo.wechat}}" class="contact-row" data-value="{{contactInfo.wechat}}" bindtap="copyContact">
+          <text class="contact-key">微信</text>
+          <text class="contact-value" selectable>{{contactInfo.wechat}}</text>
+          <text class="contact-copy">复制</text>
+        </view>
+        <view wx:if="{{contactInfo.email}}" class="contact-row" data-value="{{contactInfo.email}}" bindtap="copyContact">
+          <text class="contact-key">邮箱</text>
+          <text class="contact-value" selectable>{{contactInfo.email}}</text>
+          <text class="contact-copy">复制</text>
+        </view>
+        <view wx:if="{{contactInfo.subjectHint}}" class="contact-row" data-value="{{contactInfo.subjectHint}}" bindtap="copyContact">
+          <text class="contact-key">标题</text>
+          <text class="contact-value" selectable>{{contactInfo.subjectHint}}</text>
+          <text class="contact-copy">复制</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 管理员入口（仅管理员显示） -->
   <view wx:if="{{isAdmin}}" class="section">
+    <view class="admin-dashboard">
+      <view class="dashboard-head">
+        <view>
+          <text class="dashboard-title">运行态势看板</text>
+          <text class="dashboard-sub">{{dashboardStats.weekRange.start}} 至 {{dashboardStats.weekRange.end}}</text>
+        </view>
+        <text class="dashboard-link" bindtap="goAdmin">详情</text>
+      </view>
+      <view class="dashboard-main">
+        <view class="dashboard-total">
+          <text class="dashboard-total-num">{{dashboardStats.totalReservations}}</text>
+          <text class="dashboard-total-label">预约总次数</text>
+        </view>
+        <view class="dashboard-side">
+          <view class="dashboard-mini">
+            <text class="dashboard-mini-val">{{dashboardStats.topRoomText}}</text>
+            <text class="dashboard-mini-key">使用最高会议室</text>
+          </view>
+          <view class="dashboard-mini">
+            <text class="dashboard-mini-val">{{dashboardStats.topSlotText}}</text>
+            <text class="dashboard-mini-key">高峰时段</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <view class="admin-entry" bindtap="goAdmin">
       <view class="admin-entry-left">
-        <text class="admin-entry-icon">⚙️</text>
+        <text class="admin-entry-icon">管理</text>
         <text class="admin-entry-text">进入管理后台</text>
       </view>
       <text class="chevron">›</text>

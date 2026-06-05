@@ -11,16 +11,32 @@ Page({
     remainingCount: 0,
     dates: [],
     rooms: ['会议室A', '会议室B', '会议室C'],
+    roomDetails: [],
+    selectedRoomDetail: null,
     timeSlots: [],
     timeSlotViews: [],
+    weeklyLoading: false,
+    weekDates: [],
+    weekRows: [],
     reserveBlockReason: '',
     reservations: [],
+    showVoucher: false,
+    reservationVoucher: {
+      reservationId: '',
+      date: '',
+      room: '',
+      timeSlot: '',
+      purpose: '',
+      statusText: '',
+      createdAtText: ''
+    },
     loading: false
   },
 
   onLoad: function() {
     this.initTimeSlots();
     this.loadRoomSettings();
+    this.loadWeeklyAvailability();
     this.checkUserStatus();
     this.generateDates();
     this.setDefaultDate();
@@ -35,7 +51,15 @@ Page({
         const rooms = (settings && Array.isArray(settings.room_names) && settings.room_names.length)
           ? settings.room_names
           : ['会议室A', '会议室B', '会议室C']
-        this.setData({ rooms })
+        const roomDetails = (settings && Array.isArray(settings.room_details) && settings.room_details.length)
+          ? settings.room_details
+          : rooms.map((name, index) => ({
+              name,
+              image: `/images/rooms/room-${index + 1}.svg`,
+              capacity: index === 0 ? 8 : index === 1 ? 12 : 6,
+              equipmentText: '投影仪、白板、视频会议'
+            }))
+        this.setData({ rooms, roomDetails })
       },
       fail: (err) => {
         console.error('加载会议室设置失败', err)
@@ -58,8 +82,57 @@ Page({
   onShow: function() {
     if (this.data.selectedDate) {
       this.loadReservations(this.data.selectedDate);
+      this.loadWeeklyAvailability();
       this.checkUserStatus();
     }
+  },
+
+  isWeeklyCellExpired: function(date, timeSlot) {
+    const [startTime] = String(timeSlot || '').split('-');
+    const [hour, minute] = String(startTime || '').split(':').map(Number);
+    const slotTime = new Date(`${date}T00:00:00`);
+    if (Number.isNaN(slotTime.getTime()) || !Number.isFinite(hour) || !Number.isFinite(minute)) {
+      return false;
+    }
+    slotTime.setHours(hour, minute, 0, 0);
+    return slotTime <= new Date();
+  },
+
+  loadWeeklyAvailability: function() {
+    this.setData({ weeklyLoading: true });
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: { action: 'getWeeklyAvailability' },
+      success: (res) => {
+        const result = res.result || {};
+        const availability = result.availability || {};
+        const weekRows = (availability.rows || []).map((row) => ({
+          ...row,
+          cells: (row.cells || []).map((cell) => {
+            if (!this.isWeeklyCellExpired(cell.date, cell.timeSlot)) {
+              return cell;
+            }
+            return {
+              ...cell,
+              status: 'expired',
+              className: 'availability-cell expired',
+              statusText: '过期',
+              availableCount: 0,
+              availableRooms: []
+            };
+          })
+        }));
+        this.setData({
+          weekDates: availability.dates || [],
+          weekRows,
+          weeklyLoading: false
+        });
+      },
+      fail: (err) => {
+        console.error('loadWeeklyAvailability failed', err);
+        this.setData({ weeklyLoading: false });
+      }
+    });
   },
 
   checkUserStatus: function() {
@@ -93,7 +166,7 @@ Page({
 
   computeReserveBlockReason: function(isBound, userStatus, remainingCount) {
     if (!isBound) return '请先到【我的】页面登录/注册';
-    if (userStatus !== 'active') return '当前账号不可预约，请联系管理员';
+    if (userStatus !== 'active') return '当前账号不可预约，请联系处理人员';
     if (remainingCount <= 0) return '本周预约次数已用完';
     return ''
   },
@@ -140,7 +213,8 @@ Page({
     this.setData({
       selectedDate: date,
       selectedRoom: '',
-      selectedTimeSlot: ''
+      selectedTimeSlot: '',
+      selectedRoomDetail: null
     });
     this.computeTimeSlotViews();
     this.loadReservations(date);
@@ -148,9 +222,11 @@ Page({
 
   selectRoom: function(e) {
     const room = e.currentTarget.dataset.room;
+    const selectedRoomDetail = this.data.roomDetails.find((item) => item.name === room) || null;
     this.setData({
       selectedRoom: room,
-      selectedTimeSlot: ''
+      selectedTimeSlot: '',
+      selectedRoomDetail
     });
     this.computeTimeSlotViews();
   },
@@ -187,12 +263,50 @@ Page({
     this.computeTimeSlotViews();
   },
 
+  selectAvailabilityCell: function(e) {
+    const { date, timeslot, status } = e.currentTarget.dataset;
+    const targetRow = this.data.weekRows.find((row) => row.timeSlot === timeslot);
+    const targetCell = targetRow && targetRow.cells.find((cell) => cell.date === date);
+    const availableRooms = targetCell && Array.isArray(targetCell.availableRooms) ? targetCell.availableRooms : [];
+    if (status === 'expired') {
+      wx.showToast({ title: '该时段已过期', icon: 'none' });
+      return;
+    }
+    if (status === 'full') {
+      wx.showToast({ title: '该时段已约满', icon: 'none' });
+      return;
+    }
+    const preferredRoom = availableRooms.includes(this.data.selectedRoom)
+      ? this.data.selectedRoom
+      : availableRooms[0];
+    const selectedRoomDetail = this.data.roomDetails.find((item) => item.name === preferredRoom) || null;
+    this.setData({
+      selectedDate: date,
+      selectedRoom: preferredRoom || '',
+      selectedTimeSlot: timeslot,
+      selectedRoomDetail
+    });
+    this.loadReservations(date);
+    this.computeTimeSlotViews();
+    wx.showToast({ title: '已带入可用时段', icon: 'success' });
+  },
+
   inputPurpose: function(e) {
     const val = e.detail.value
     this.setData({
       purpose: val,
       purposeLength: val.length
     });
+  },
+
+  formatNowText: function() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}`;
   },
 
   loadReservations: function(date) {
@@ -308,7 +422,7 @@ Page({
 
     if (this.data.userStatus === 'disabled') {
       wx.showToast({
-        title: '账户已被禁用，请联系管理员',
+        title: '账户已被禁用，请联系处理人员',
         icon: 'none'
       });
       return;
@@ -385,18 +499,21 @@ Page({
         wx.hideLoading();
         console.log('reserveRoom result', res);
         if (res.result.success) {
-          wx.showToast({
-            title: '预约成功',
-            icon: 'success'
-          });
           that.setData({
-            remainingCount: Math.max(0, that.data.remainingCount - 1)
+            remainingCount: Math.max(0, that.data.remainingCount - 1),
+            showVoucher: true,
+            reservationVoucher: {
+              reservationId: res.result.reservationId || '--',
+              date: selectedDate,
+              room: selectedRoom,
+              timeSlot: selectedTimeSlot,
+              purpose: purpose || '未填写',
+              statusText: '已预约',
+              createdAtText: that.formatNowText()
+            }
           });
-          setTimeout(() => {
-            wx.switchTab({
-              url: '/pages/index/index'
-            });
-          }, 300);
+          that.loadWeeklyAvailability();
+          that.loadReservations(selectedDate);
         } else {
           const msg = (res.result && (res.result.message || res.result.error)) || '预约失败';
           wx.showToast({
@@ -413,6 +530,30 @@ Page({
           icon: 'none'
         });
       }
+    });
+  },
+
+  closeVoucher: function() {
+    this.setData({
+      showVoucher: false,
+      selectedTimeSlot: '',
+      purpose: '',
+      purposeLength: 0
+    });
+    this.computeTimeSlotViews();
+  },
+
+  goVoucherHome: function() {
+    this.setData({ showVoucher: false });
+    wx.switchTab({
+      url: '/pages/index/index'
+    });
+  },
+
+  goVoucherReservations: function() {
+    this.setData({ showVoucher: false });
+    wx.switchTab({
+      url: '/pages/myReservations/myReservations'
     });
   }
 });

@@ -7,8 +7,25 @@ Page({
     userInfo: null,
     avatarChar: '用',
     remainingCount: 0,
+    dashboardLoading: false,
+    dashboardStats: {
+      weekRange: { start: '', end: '' },
+      totalReservations: 0,
+      roomUsage: [],
+      activeUsers: [],
+      peakSlots: [],
+      topRoomText: '--',
+      topSlotText: '--'
+    },
     reservations: [],
-    loading: false
+    loading: false,
+    showPasswordForm: false,
+    passwordForm: {
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    },
+    passwordSubmitting: false
   },
 
   onShow() {
@@ -51,7 +68,11 @@ Page({
           loading: false
         })
         if (isBound) {
-          this.loadReservations()
+          if (this.data.isAdmin) {
+            this.loadDashboardStats()
+          } else {
+            this.loadReservations()
+          }
         } else {
           this.setData({
             reservations: []
@@ -100,6 +121,35 @@ Page({
     })
   },
 
+  loadDashboardStats() {
+    this.setData({ dashboardLoading: true })
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: {
+        action: 'getDashboardStats'
+      },
+      success: (res) => {
+        const result = res.result || {}
+        if (result.success && result.stats) {
+          this.setData({
+            dashboardStats: result.stats,
+            dashboardLoading: false
+          })
+          return
+        }
+        this.setData({ dashboardLoading: false })
+      },
+      fail: (err) => {
+        console.error('loadDashboardStats failed', err)
+        this.setData({ dashboardLoading: false })
+      }
+    })
+  },
+
+  goAdmin() {
+    wx.navigateTo({ url: '/pages/admin/admin' })
+  },
+
   goLogin() {
     wx.navigateTo({
       url: '/pages/login/login'
@@ -115,6 +165,80 @@ Page({
   goMyFeedbacks() {
     wx.navigateTo({
       url: '/pages/myFeedbacks/myFeedbacks'
+    })
+  },
+
+  togglePasswordForm() {
+    this.setData({
+      showPasswordForm: !this.data.showPasswordForm,
+      passwordForm: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }
+    })
+  },
+
+  bindPasswordInput(e) {
+    const key = e.currentTarget.dataset.key
+    if (!key) return
+    this.setData({
+      [`passwordForm.${key}`]: e.detail.value
+    })
+  },
+
+  submitChangePassword() {
+    if (this.data.passwordSubmitting) return
+    const oldPassword = String(this.data.passwordForm.oldPassword || '')
+    const newPassword = String(this.data.passwordForm.newPassword || '')
+    const confirmPassword = String(this.data.passwordForm.confirmPassword || '')
+
+    if (oldPassword.length < 6) {
+      wx.showToast({ title: '请输入当前密码', icon: 'none' })
+      return
+    }
+    if (newPassword.length < 6) {
+      wx.showToast({ title: '新密码至少6位', icon: 'none' })
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      wx.showToast({ title: '两次密码不一致', icon: 'none' })
+      return
+    }
+
+    this.setData({ passwordSubmitting: true })
+    wx.showLoading({ title: '修改中...' })
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: {
+        action: 'changePassword',
+        oldPassword,
+        newPassword
+      },
+      success: (res) => {
+        wx.hideLoading()
+        this.setData({ passwordSubmitting: false })
+        const result = res.result || {}
+        if (result.success) {
+          wx.showToast({ title: '修改成功', icon: 'success' })
+          this.setData({
+            showPasswordForm: false,
+            passwordForm: {
+              oldPassword: '',
+              newPassword: '',
+              confirmPassword: ''
+            }
+          })
+          return
+        }
+        wx.showToast({ title: result.message || '修改失败', icon: 'none' })
+      },
+      fail: (err) => {
+        wx.hideLoading()
+        this.setData({ passwordSubmitting: false })
+        console.error('changePassword failed', err)
+        wx.showToast({ title: '修改失败', icon: 'none' })
+      }
     })
   },
 

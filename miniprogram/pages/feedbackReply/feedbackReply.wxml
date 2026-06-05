@@ -19,7 +19,7 @@
     </view>
 
     <view class="card">
-      <text class="label">管理员回复</text>
+      <text class="label">处理回复</text>
       <textarea class="reply" maxlength="500" value="{{replyInput}}" bindinput="bindReply" placeholder="请输入回复内容"></textarea>
       <button class="submit" bindtap="submitReply" loading="{{submitting}}">提交回复</button>
     </view>

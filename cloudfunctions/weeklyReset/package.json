@@ -4,6 +4,6 @@
   "description": "每周刷新用户预约次数",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "latest"
+    "wx-server-sdk": "3.0.4"
   }
 }

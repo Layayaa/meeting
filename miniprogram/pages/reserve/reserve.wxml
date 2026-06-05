@@ -1,23 +1,125 @@
 <!-- pages/reserve/reserve.wxml -->
 <view class="page">
-  <!-- Header Quota Bar -->
-  <view class="quota-bar {{remainingCount <= 0 ? 'quota-empty' : ''}}">
-    <view class="quota-left">
-      <text class="quota-label">本周剩余预约</text>
-      <view wx:if="{{!isBound}}" class="quota-warn-text">请先登录</view>
-      <view wx:elif="{{userStatus === 'disabled'}}" class="quota-warn-text">账户已禁用</view>
+  <!-- Resource Dispatch Header -->
+  <view class="dispatch-hero">
+    <view class="dispatch-head">
+      <view>
+        <text class="dispatch-kicker">会议室资源调度</text>
+        <text class="dispatch-title">预约办理</text>
+      </view>
+      <view class="dispatch-status {{reserveBlockReason ? 'blocked' : 'normal'}}">
+        {{reserveBlockReason ? '受限' : '可办理'}}
+      </view>
     </view>
-    <view class="quota-right">
-      <text class="quota-num {{remainingCount <= 0 ? 'zero' : ''}}">{{remainingCount}}</text>
-      <text class="quota-unit">次</text>
+
+    <view class="dispatch-panel">
+      <view class="dispatch-quota">
+        <text class="dispatch-num {{remainingCount <= 0 ? 'zero' : ''}}">{{isBound ? remainingCount : '--'}}</text>
+        <text class="dispatch-label">本周剩余额度</text>
+      </view>
+      <view class="dispatch-info">
+        <view class="dispatch-info-row">
+          <text class="info-key">当前日期</text>
+          <text class="info-val">{{selectedDate || '待选择'}}</text>
+        </view>
+        <view class="dispatch-info-row">
+          <text class="info-key">会议室</text>
+          <text class="info-val">{{selectedRoom || '待选择'}}</text>
+        </view>
+        <view class="dispatch-info-row">
+          <text class="info-key">预约时段</text>
+          <text class="info-val">{{selectedTimeSlot || '待选择'}}</text>
+        </view>
+      </view>
     </view>
+
+    <view class="dispatch-steps">
+      <view class="step-item {{selectedDate ? 'done' : ''}}">
+        <text class="step-index">1</text>
+        <text class="step-text">选日期</text>
+      </view>
+      <view class="step-line {{selectedRoom ? 'done' : ''}}"></view>
+      <view class="step-item {{selectedRoom ? 'done' : ''}}">
+        <text class="step-index">2</text>
+        <text class="step-text">选会议室</text>
+      </view>
+      <view class="step-line {{selectedTimeSlot ? 'done' : ''}}"></view>
+      <view class="step-item {{selectedTimeSlot ? 'done' : ''}}">
+        <text class="step-index">3</text>
+        <text class="step-text">确认办理</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{reserveBlockReason}}" class="dispatch-alert">
+    <text>{{reserveBlockReason}}</text>
+  </view>
+
+  <view class="card weekly-card">
+    <view class="card-title weekly-title-row">
+      <view>
+        <text class="title-dot"></text>
+        <view>
+          <text class="title-main">本周资源占用总览</text>
+          <text class="title-sub">点击可用时段可自动带入会议室和时间</text>
+        </view>
+      </view>
+      <text class="weekly-loading" wx:if="{{weeklyLoading}}">加载中...</text>
+    </view>
+    <view class="legend-row">
+      <view class="legend-item">
+        <text class="legend-swatch free"></text>
+        <text>空闲</text>
+      </view>
+      <view class="legend-item">
+        <text class="legend-swatch partial"></text>
+        <text>部分占用</text>
+      </view>
+      <view class="legend-item">
+        <text class="legend-swatch full"></text>
+        <text>已满</text>
+      </view>
+      <view class="legend-item">
+        <text class="legend-swatch expired"></text>
+        <text>过期</text>
+      </view>
+    </view>
+    <scroll-view scroll-x class="availability-scroll">
+      <view class="availability-table">
+        <view class="availability-row availability-header">
+          <view class="time-head">时段</view>
+          <view wx:for="{{weekDates}}" wx:key="date" class="date-head">
+            <text class="date-head-main">{{item.dayLabel}}</text>
+            <text class="date-head-sub">{{item.monthDay}}</text>
+          </view>
+        </view>
+        <view wx:for="{{weekRows}}" wx:key="timeSlot" class="availability-row">
+          <view class="time-cell">{{item.timeSlot}}</view>
+          <view
+            wx:for="{{item.cells}}"
+            wx:for-item="cell"
+            wx:key="date"
+            class="{{cell.className}}"
+            data-date="{{cell.date}}"
+            data-timeslot="{{cell.timeSlot}}"
+            data-status="{{cell.status}}"
+            bindtap="selectAvailabilityCell"
+          >
+            <text>{{cell.statusText}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- Date Selection -->
   <view class="card">
     <view class="card-title">
       <text class="title-dot"></text>
-      <text>选择日期</text>
+      <view>
+        <text class="title-main">选择办理日期</text>
+        <text class="title-sub">仅支持未来 7 天内预约</text>
+      </view>
     </view>
     <scroll-view scroll-x class="date-scroll">
       <view
@@ -37,7 +139,10 @@
   <view class="card">
     <view class="card-title">
       <text class="title-dot"></text>
-      <text>选择会议室</text>
+      <view>
+        <text class="title-main">选择会议室资源</text>
+        <text class="title-sub">查看可容纳人数、设备和当前可用时段</text>
+      </view>
     </view>
     <view class="room-row">
       <view
@@ -53,11 +158,25 @@
     </view>
   </view>
 
+  <view wx:if="{{selectedRoomDetail}}" class="room-detail-card">
+    <image class="room-detail-image" mode="aspectFill" src="{{selectedRoomDetail.image}}"></image>
+    <view class="room-detail-body">
+      <view class="room-detail-head">
+        <text class="room-detail-name">{{selectedRoomDetail.name}}</text>
+        <text class="room-capacity">{{selectedRoomDetail.capacity}}人</text>
+      </view>
+      <text class="room-equipment">{{selectedRoomDetail.equipmentText}}</text>
+    </view>
+  </view>
+
   <!-- Time Slots -->
   <view wx:if="{{selectedRoom}}" class="card">
     <view class="card-title">
       <text class="title-dot"></text>
-      <text>选择时段</text>
+      <view>
+        <text class="title-main">选择预约时段</text>
+        <text class="title-sub">蓝色状态表示当前可预约资源</text>
+      </view>
     </view>
     <view class="slot-list">
       <view
@@ -72,7 +191,7 @@
           <text wx:if="{{item.isFull}}" class="slot-tag busy">已约满</text>
           <text wx:elif="{{item.isReserved}}" class="slot-tag reserved">{{item.reserverName}}</text>
           <text wx:elif="{{item.isExpired}}" class="slot-tag expired">已过期</text>
-          <text wx:elif="{{item.isSelected}}" class="slot-check">✓</text>
+          <text wx:elif="{{item.isSelected}}" class="slot-check">已选</text>
           <text wx:else class="slot-tag free">空闲</text>
         </view>
       </view>
@@ -83,7 +202,10 @@
   <view wx:if="{{selectedTimeSlot}}" class="card">
     <view class="card-title">
       <text class="title-dot"></text>
-      <text>预约用途 </text><text class="optional">（可选）</text>
+      <view>
+        <text class="title-main">填写预约用途</text>
+        <text class="title-sub">建议填写会议主题，便于管理留痕</text>
+      </view>
     </view>
     <textarea
       class="purpose-input"
@@ -103,5 +225,53 @@
       bindtap="confirmReserve"
       disabled="{{!isBound || userStatus !== 'active' || remainingCount <= 0}}"
     >确认预约</button>
+  </view>
+
+  <view wx:if="{{showVoucher}}" class="voucher-mask">
+    <view class="voucher-card">
+      <view class="voucher-head">
+        <view>
+          <text class="voucher-kicker">预约办理凭证</text>
+          <text class="voucher-title">会议室预约已提交</text>
+        </view>
+        <text class="voucher-status">{{reservationVoucher.statusText}}</text>
+      </view>
+
+      <view class="voucher-no-row">
+        <text class="voucher-no-label">预约编号</text>
+        <text class="voucher-no">{{reservationVoucher.reservationId}}</text>
+      </view>
+
+      <view class="voucher-lines">
+        <view class="voucher-line">
+          <text class="voucher-key">会议室</text>
+          <text class="voucher-value">{{reservationVoucher.room}}</text>
+        </view>
+        <view class="voucher-line">
+          <text class="voucher-key">预约日期</text>
+          <text class="voucher-value">{{reservationVoucher.date}}</text>
+        </view>
+        <view class="voucher-line">
+          <text class="voucher-key">预约时段</text>
+          <text class="voucher-value">{{reservationVoucher.timeSlot}}</text>
+        </view>
+        <view class="voucher-line">
+          <text class="voucher-key">预约用途</text>
+          <text class="voucher-value">{{reservationVoucher.purpose}}</text>
+        </view>
+        <view class="voucher-line">
+          <text class="voucher-key">提交时间</text>
+          <text class="voucher-value">{{reservationVoucher.createdAtText}}</text>
+        </view>
+      </view>
+
+      <view class="voucher-note">请按预约时段使用会议室，如需取消请提前在“我的预约”中办理。</view>
+
+      <view class="voucher-actions">
+        <button class="voucher-btn secondary" bindtap="goVoucherHome">返回首页</button>
+        <button class="voucher-btn primary" bindtap="goVoucherReservations">查看预约</button>
+      </view>
+      <view class="voucher-close" bindtap="closeVoucher">继续预约</view>
+    </view>
   </view>
 </view>

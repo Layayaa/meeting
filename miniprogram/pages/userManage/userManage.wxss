@@ -1,6 +1,6 @@
 /* pages/userManage/userManage.wxss */
 page {
-  background: #f0f2f7;
+  background: #f4f7fb;
   min-height: 100vh;
 }
 
@@ -19,7 +19,7 @@ page {
 .section-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .section-count {
@@ -30,9 +30,10 @@ page {
 /* Form Card */
 .form-card {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   padding: 28rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #e6edf7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 42, 95, 0.07);
 }
 
 .input-group {
@@ -56,9 +57,9 @@ page {
 .input {
   width: 100%;
   height: 80rpx;
-  background: #f9fafb;
-  border: 2rpx solid #e5e7eb;
-  border-radius: 12rpx;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
+  border-radius: 10rpx;
   padding: 0 20rpx;
   font-size: 26rpx;
   color: #1f2937;
@@ -68,9 +69,9 @@ page {
 .add-btn {
   width: 100%;
   height: 80rpx;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #0b1f4d, #2563eb);
   color: #fff;
-  border-radius: 40rpx;
+  border-radius: 10rpx;
   font-size: 28rpx;
   font-weight: 600;
   margin-top: 8rpx;
@@ -86,7 +87,16 @@ page {
 }
 
 .empty-icon {
-  font-size: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 10rpx;
+  background: #eff6ff;
+  color: #123c7c;
+  font-size: 24rpx;
+  font-weight: 800;
   margin-bottom: 16rpx;
 }
 
@@ -98,10 +108,11 @@ page {
 /* User Card */
 .user-card {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 12rpx;
   padding: 24rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #e6edf7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 42, 95, 0.07);
 }
 
 .user-header {
@@ -114,8 +125,8 @@ page {
 .user-avatar {
   width: 72rpx;
   height: 72rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border-radius: 10rpx;
+  background: linear-gradient(135deg, #0b1f4d, #2563eb);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,12 +149,12 @@ page {
 .user-name {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .user-dept {
   background: #eff6ff;
-  color: #2563eb;
+  color: #123c7c;
   font-size: 20rpx;
   padding: 2rpx 10rpx;
   border-radius: 6rpx;
@@ -169,8 +180,8 @@ page {
 /* User Stats */
 .user-stats {
   display: flex;
-  background: #f9fafb;
-  border-radius: 12rpx;
+  background: #f7faff;
+  border-radius: 10rpx;
   padding: 16rpx 0;
   margin-bottom: 20rpx;
 }
@@ -186,7 +197,7 @@ page {
 .stat-val {
   font-size: 32rpx;
   font-weight: 700;
-  color: #2563eb;
+  color: #123c7c;
 }
 
 .stat-key {
@@ -209,8 +220,8 @@ page {
 .dispatch-input {
   flex: 1;
   height: 68rpx;
-  background: #f9fafb;
-  border: 2rpx solid #e5e7eb;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
   border-radius: 10rpx;
   padding: 0 16rpx;
   font-size: 26rpx;
@@ -222,7 +233,7 @@ page {
   width: 140rpx;
   height: 68rpx;
   background: #eff6ff;
-  color: #2563eb;
+  color: #123c7c;
   border-radius: 10rpx;
   font-size: 26rpx;
   font-weight: 600;

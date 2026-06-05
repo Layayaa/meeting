@@ -7,11 +7,43 @@ Page({
     userStatus: 'inactive',
     userInfo: null,
     displayName: '用户',
+    avatarText: '用',
     noticePreview: null,
     noticePreviewLoading: false,
     todayDisplay: '',
     todayRooms: [],
+    todayFreeCount: 0,
+    todayBusyCount: 0,
+    contactInfo: {
+      wechat: '',
+      email: '',
+      qrImage: '',
+      subjectHint: '',
+      visible: false
+    },
+    accountStatusText: '未登录',
+    accountStatusClass: 'offline',
+    dashboardLoading: false,
+    dashboardStats: {
+      weekRange: { start: '', end: '' },
+      totalReservations: 0,
+      roomUsage: [],
+      activeUsers: [],
+      peakSlots: [],
+      topRoomText: '--',
+      topSlotText: '--'
+    },
     rooms: ['会议室A', '会议室B', '会议室C']
+  },
+
+  getDefaultContactInfo: function() {
+    return {
+      wechat: '',
+      email: '3963632979@qq.com',
+      qrImage: '/images/contact/oacend-wechat.jpg',
+      subjectHint: '项目名称+联系人姓名+电话',
+      visible: true
+    };
   },
 
   onLoad: function() {
@@ -95,16 +127,76 @@ Page({
         const rooms = (settings && Array.isArray(settings.room_names) && settings.room_names.length)
           ? settings.room_names
           : ['会议室A', '会议室B', '会议室C'];
-        this.setData({ rooms }, () => {
+        const defaults = this.getDefaultContactInfo();
+        const contactWechat = String((settings && settings.contact_wechat) || defaults.wechat).trim();
+        const contactEmail = String((settings && settings.contact_email) || defaults.email).trim();
+        const contactQrImage = String((settings && settings.contact_qr_image) || defaults.qrImage).trim();
+        const contactSubjectHint = String((settings && settings.contact_subject_hint) || defaults.subjectHint).trim();
+        this.setData({
+          rooms,
+          contactInfo: {
+            wechat: contactWechat,
+            email: contactEmail,
+            qrImage: contactQrImage,
+            subjectHint: contactSubjectHint,
+            visible: !!(contactWechat || contactEmail || contactQrImage)
+          }
+        }, () => {
           this.loadTodayRooms();
         });
       },
       fail: () => {
         this.setData({
-          rooms: ['会议室A', '会议室B', '会议室C']
+          rooms: ['会议室A', '会议室B', '会议室C'],
+          contactInfo: this.getDefaultContactInfo()
         }, () => {
           this.loadTodayRooms();
         });
+      }
+    });
+  },
+
+  copyContact: function(e) {
+    const value = String(e.currentTarget.dataset.value || '').trim();
+    if (!value) return;
+    wx.setClipboardData({
+      data: value,
+      success: () => {
+        wx.showToast({ title: '已复制', icon: 'success' });
+      }
+    });
+  },
+
+  saveContactQr: function(e) {
+    const src = String(e.currentTarget.dataset.src || '').trim();
+    if (!src) return;
+    wx.getImageInfo({
+      src,
+      success: (info) => {
+        wx.saveImageToPhotosAlbum({
+          filePath: info.path,
+          success: () => {
+            wx.showToast({ title: '已保存', icon: 'success' });
+          },
+          fail: (err) => {
+            const message = String((err && err.errMsg) || '');
+            if (message.includes('auth deny') || message.includes('authorize no response')) {
+              wx.showModal({
+                title: '需要授权',
+                content: '请允许保存到相册后，再次点击二维码保存。',
+                confirmText: '去设置',
+                success: (res) => {
+                  if (res.confirm) wx.openSetting();
+                }
+              });
+              return;
+            }
+            wx.showToast({ title: '保存失败', icon: 'none' });
+          }
+        });
+      },
+      fail: () => {
+        wx.showToast({ title: '二维码加载失败', icon: 'none' });
       }
     });
   },
@@ -115,6 +207,22 @@ Page({
     const day = now.getDate();
     const weekDay = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
     this.setData({ todayDisplay: `${month}月${day}日 周${weekDay}` });
+  },
+
+  updateAccountStatus: function(isBound, userStatus) {
+    let accountStatusText = '未登录';
+    let accountStatusClass = 'offline';
+    if (isBound && userStatus === 'active') {
+      accountStatusText = '可预约';
+      accountStatusClass = 'normal';
+    } else if (isBound && userStatus === 'disabled') {
+      accountStatusText = '已禁用';
+      accountStatusClass = 'disabled';
+    } else if (isBound) {
+      accountStatusText = '待启用';
+      accountStatusClass = 'pending';
+    }
+    this.setData({ accountStatusText, accountStatusClass });
   },
 
   checkUserStatus: function() {
@@ -130,7 +238,13 @@ Page({
           userStatus: result.userStatus || 'inactive',
           userInfo,
           displayName: userInfo && userInfo.name ? userInfo.name : '用户',
+          avatarText: userInfo && userInfo.name ? String(userInfo.name).slice(0, 1) : '用',
           remainingCount: Number(result.remainingCount) || 0
+        }, () => {
+          that.updateAccountStatus(that.data.isBound, that.data.userStatus);
+          if (that.data.isAdmin) {
+            that.loadDashboardStats();
+          }
         });
       },
       fail: err => {
@@ -141,7 +255,10 @@ Page({
           userStatus: 'inactive',
           userInfo: null,
           displayName: '用户',
+          avatarText: '用',
           remainingCount: 0
+        }, () => {
+          that.updateAccountStatus(false, 'inactive');
         });
       }
     });
@@ -167,12 +284,43 @@ Page({
           const statusText = isFree ? '' : `已约 ${pending.length} 段`;
           return { room, isFree, statusText };
         });
-        this.setData({ todayRooms });
+        const todayFreeCount = todayRooms.filter(item => item.isFree).length;
+        this.setData({
+          todayRooms,
+          todayFreeCount,
+          todayBusyCount: Math.max(0, todayRooms.length - todayFreeCount)
+        });
       },
       fail: () => {
+        const todayRooms = rooms.map(room => ({ room, isFree: true, statusText: '' }));
         this.setData({
-          todayRooms: rooms.map(room => ({ room, isFree: true, statusText: '' }))
+          todayRooms,
+          todayFreeCount: todayRooms.length,
+          todayBusyCount: 0
         });
+      }
+    });
+  },
+
+  loadDashboardStats: function() {
+    this.setData({ dashboardLoading: true });
+    wx.cloud.callFunction({
+      name: 'serviceFunctions',
+      data: { action: 'getDashboardStats' },
+      success: (res) => {
+        const result = res.result || {};
+        if (result.success && result.stats) {
+          this.setData({
+            dashboardStats: result.stats,
+            dashboardLoading: false
+          });
+          return;
+        }
+        this.setData({ dashboardLoading: false });
+      },
+      fail: (err) => {
+        console.error('loadDashboardStats failed', err);
+        this.setData({ dashboardLoading: false });
       }
     });
   },

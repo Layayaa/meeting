@@ -1,6 +1,6 @@
 /* pages/settings/settings.wxss */
 page {
-  background: #f0f2f7;
+  background: #f4f7fb;
   min-height: 100vh;
 }
 
@@ -15,15 +15,16 @@ page {
 .section-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 /* Card */
 .card {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   padding: 28rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #e6edf7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 42, 95, 0.07);
 }
 
 .setting-item {
@@ -42,24 +43,26 @@ page {
 .setting-label {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .setting-desc {
+  display: block;
   font-size: 22rpx;
   color: #9ca3af;
+  margin-top: 6rpx;
 }
 
 .count-input {
   width: 100rpx;
   height: 64rpx;
   background: #eff6ff;
-  border: 2rpx solid #bfdbfe;
+  border: 1rpx solid #bfdbfe;
   border-radius: 10rpx;
   text-align: center;
   font-size: 32rpx;
   font-weight: 700;
-  color: #2563eb;
+  color: #123c7c;
   box-sizing: border-box;
 }
 
@@ -88,13 +91,137 @@ page {
 .room-input {
   flex: 1;
   height: 68rpx;
-  background: #f9fafb;
-  border: 2rpx solid #e5e7eb;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
   border-radius: 10rpx;
   padding: 0 16rpx;
   font-size: 26rpx;
-  color: #1f2937;
+  color: #16233a;
   box-sizing: border-box;
+}
+
+.room-detail-card {
+  margin-top: 18rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
+}
+
+.room-detail-title {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #0b1f4d;
+}
+
+.room-image-panel {
+  display: flex;
+  gap: 18rpx;
+  padding: 16rpx;
+  border-radius: 10rpx;
+  background: #fff;
+  border: 1rpx solid #e6edf7;
+}
+
+.room-image-preview {
+  width: 150rpx;
+  height: 110rpx;
+  flex-shrink: 0;
+  border-radius: 8rpx;
+  background: #e6edf7;
+}
+
+.room-image-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.room-image-title {
+  display: block;
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #0b1f4d;
+}
+
+.room-image-desc {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #8a95a8;
+  line-height: 1.4;
+}
+
+.room-upload-btn {
+  width: 180rpx;
+  height: 58rpx;
+  margin-top: 12rpx;
+  border-radius: 10rpx;
+  background: #eff6ff;
+  color: #123c7c;
+  font-size: 24rpx;
+  font-weight: 700;
+  border: none;
+}
+
+.room-detail-row {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.room-detail-label {
+  width: 120rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.room-detail-input {
+  flex: 1;
+  height: 64rpx;
+  padding: 0 16rpx;
+  border-radius: 10rpx;
+  background: #fff;
+  font-size: 25rpx;
+  color: #16233a;
+}
+
+.contact-card {
+  padding-top: 26rpx;
+}
+
+.contact-head {
+  margin-bottom: 18rpx;
+}
+
+.contact-input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 14rpx;
+}
+
+.contact-label {
+  width: 104rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.contact-input {
+  flex: 1;
+  height: 68rpx;
+  padding: 0 16rpx;
+  border-radius: 10rpx;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
+  font-size: 26rpx;
+  color: #16233a;
+  box-sizing: border-box;
+}
+
+.contact-save {
+  margin-top: 22rpx;
 }
 
 .divider {
@@ -105,9 +232,9 @@ page {
 .save-btn {
   width: 100%;
   height: 80rpx;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #0b1f4d, #2563eb);
   color: #fff;
-  border-radius: 40rpx;
+  border-radius: 10rpx;
   font-size: 28rpx;
   font-weight: 600;
   margin-top: 24rpx;
@@ -126,7 +253,7 @@ page {
   display: block;
   font-size: 28rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .danger-desc {

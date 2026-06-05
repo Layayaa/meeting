@@ -1,6 +1,6 @@
 /* pages/reservationManage/reservationManage.wxss */
 page {
-  background: #f0f2f7;
+  background: #f4f7fb;
   min-height: 100vh;
 }
 
@@ -11,16 +11,17 @@ page {
 /* Filter Card */
 .filter-card {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   padding: 28rpx;
   margin: 20rpx 0 0;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #e6edf7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 42, 95, 0.07);
 }
 
 .filter-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: #0b1f4d;
   margin-bottom: 20rpx;
 }
 
@@ -44,8 +45,8 @@ page {
 
 .filter-input {
   height: 68rpx;
-  background: #f9fafb;
-  border: 2rpx solid #e5e7eb;
+  background: #f7faff;
+  border: 1rpx solid #e6edf7;
   border-radius: 10rpx;
   padding: 0 14rpx;
   font-size: 24rpx;
@@ -56,9 +57,9 @@ page {
 .search-btn {
   width: 100%;
   height: 76rpx;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #0b1f4d, #2563eb);
   color: #fff;
-  border-radius: 38rpx;
+  border-radius: 10rpx;
   font-size: 28rpx;
   font-weight: 600;
   border: none;
@@ -75,7 +76,7 @@ page {
 .section-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .section-count {
@@ -92,7 +93,16 @@ page {
 }
 
 .empty-icon {
-  font-size: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 10rpx;
+  background: #eff6ff;
+  color: #123c7c;
+  font-size: 28rpx;
+  font-weight: 800;
   margin-bottom: 16rpx;
 }
 
@@ -104,10 +114,11 @@ page {
 /* Reserve Card */
 .reserve-card {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 12rpx;
   overflow: hidden;
   margin-bottom: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #e6edf7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 42, 95, 0.07);
 }
 
 .card-top {
@@ -124,13 +135,16 @@ page {
 .user-name {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: #0b1f4d;
 }
 
 .status-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22rpx;
   padding: 4rpx 14rpx;
-  border-radius: 20rpx;
+  border-radius: 8rpx;
 }
 
 .status-badge.pending { background: #eff6ff; color: #2563eb; }
@@ -146,18 +160,20 @@ page {
 }
 
 .status-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   height: 60rpx;
-  line-height: 60rpx;
   padding: 0 24rpx;
-  border-radius: 30rpx;
+  border-radius: 10rpx;
   background: #f3f4f6;
   color: #6b7280;
   font-size: 24rpx;
 }
 
 .status-tab.active {
-  background: #2563eb;
+  background: #123c7c;
   color: #fff;
 }
 
@@ -173,8 +189,16 @@ page {
 }
 
 .info-icon {
-  font-size: 24rpx;
-  width: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58rpx;
+  height: 38rpx;
+  border-radius: 8rpx;
+  background: #eff6ff;
+  color: #123c7c;
+  font-size: 18rpx;
+  font-weight: 800;
 }
 
 .info-text {

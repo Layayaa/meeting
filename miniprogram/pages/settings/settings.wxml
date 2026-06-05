@@ -1,5 +1,11 @@
 <!-- pages/settings/settings.wxml -->
 <view class="page">
+  <view class="module-hero">
+    <text class="module-kicker">系统基础配置</text>
+    <text class="module-title">规则与资源设置</text>
+    <text class="module-desc">维护预约配额、会议室档案和周期刷新规则</text>
+  </view>
+
   <!-- Global Rules -->
   <view class="section-title-row">
     <text class="section-title">全局规则</text>
@@ -40,8 +46,88 @@
           bindinput="bindRoomNameChange"
         />
       </view>
+      <view wx:for="{{room_details}}" wx:key="name" class="room-detail-card">
+        <text class="room-detail-title">{{item.name}}</text>
+        <view class="room-image-panel">
+          <image class="room-image-preview" mode="aspectFill" src="{{item.image}}"></image>
+          <view class="room-image-body">
+            <text class="room-image-title">会议室图片</text>
+            <text class="room-image-desc">可上传新图片，也可手动填写图片路径</text>
+            <button class="room-upload-btn" data-index="{{index}}" bindtap="chooseRoomImage">上传图片</button>
+          </view>
+        </view>
+        <view class="room-detail-row">
+          <text class="room-detail-label">图片</text>
+          <input class="room-detail-input" placeholder="/images/rooms/room-1.svg 或 cloud://..." value="{{item.image}}" data-index="{{index}}" data-key="image" bindinput="bindRoomDetailChange" />
+        </view>
+        <view class="room-detail-row">
+          <text class="room-detail-label">可容纳人数</text>
+          <input class="room-detail-input" type="number" placeholder="可容纳人数" value="{{item.capacity}}" data-index="{{index}}" data-key="capacity" bindinput="bindRoomDetailChange" />
+        </view>
+        <view class="room-detail-row">
+          <text class="room-detail-label">设备</text>
+          <input class="room-detail-input" placeholder="投影仪、白板、视频会议" value="{{item.equipmentText}}" data-index="{{index}}" data-key="equipmentText" bindinput="bindRoomDetailChange" />
+        </view>
+      </view>
     </view>
     <button class="save-btn" bindtap="saveSettings">保存设置</button>
+  </view>
+
+  <view class="section-title-row">
+    <text class="section-title">联系信息</text>
+  </view>
+  <view class="card contact-card">
+    <view class="contact-head">
+      <view>
+        <text class="setting-label">个人联系信息</text>
+        <text class="setting-desc">用于首页展示微信二维码和邮箱，便于个人用户联系和材料投递</text>
+      </view>
+    </view>
+    <view class="contact-input-row">
+      <text class="contact-label">微信</text>
+      <input
+        class="contact-input"
+        maxlength="40"
+        placeholder="请输入联系微信号，可留空"
+        value="{{contact_wechat}}"
+        data-key="contact_wechat"
+        bindinput="bindContactChange"
+      />
+    </view>
+    <view class="contact-input-row">
+      <text class="contact-label">二维码</text>
+      <input
+        class="contact-input"
+        maxlength="120"
+        placeholder="/images/contact/oacend-wechat.jpg"
+        value="{{contact_qr_image}}"
+        data-key="contact_qr_image"
+        bindinput="bindContactChange"
+      />
+    </view>
+    <view class="contact-input-row">
+      <text class="contact-label">邮箱</text>
+      <input
+        class="contact-input"
+        maxlength="80"
+        placeholder="请输入材料投递邮箱"
+        value="{{contact_email}}"
+        data-key="contact_email"
+        bindinput="bindContactChange"
+      />
+    </view>
+    <view class="contact-input-row">
+      <text class="contact-label">标题</text>
+      <input
+        class="contact-input"
+        maxlength="80"
+        placeholder="项目名称+联系人姓名+电话"
+        value="{{contact_subject_hint}}"
+        data-key="contact_subject_hint"
+        bindinput="bindContactChange"
+      />
+    </view>
+    <button class="save-btn contact-save" bindtap="saveSettings">保存合作信息</button>
   </view>
 
   <!-- Danger Zone -->

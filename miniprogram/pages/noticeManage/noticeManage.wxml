@@ -1,6 +1,12 @@
-﻿<view class="page">
+<view class="page">
+  <view class="module-hero">
+    <text class="module-kicker">信息发布管理</text>
+    <text class="module-title">通知公告管理</text>
+    <text class="module-desc">维护通知草稿、发布状态和置顶公告</text>
+  </view>
+
   <view class="top-actions">
-    <button class="create" bindtap="createNotice">+ 新建通知</button>
+    <button class="create" bindtap="createNotice">新建通知</button>
   </view>
 
   <view class="tabs">

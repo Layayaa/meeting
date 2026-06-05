@@ -18,16 +18,13 @@
     "pages/feedbackReply/feedbackReply",
     "pages/noticeManage/noticeManage",
     "pages/noticeEdit/noticeEdit",
-    "pages/settings/settings",
-    "pages/initDatabase/initDatabase",
-    "pages/testAdmin/testAdmin",
-    "pages/example/index"
+    "pages/settings/settings"
   ],
   "window": {
     "backgroundColor": "#f0f2f7",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTitleText": "会议室预约系统",
+    "navigationBarTitleText": "OPC小助手",
     "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json",
@@ -48,26 +45,26 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页",
-        "iconPath": "images/icons/home.png",
-        "selectedIconPath": "images/icons/home-active.png"
+        "iconPath": "images/icons/tab-home.png",
+        "selectedIconPath": "images/icons/tab-home-active.png"
       },
       {
         "pagePath": "pages/reserve/reserve",
         "text": "预约",
-        "iconPath": "images/icons/reserve.png",
-        "selectedIconPath": "images/icons/reserve.png"
+        "iconPath": "images/icons/tab-reserve.png",
+        "selectedIconPath": "images/icons/tab-reserve-active.png"
       },
       {
         "pagePath": "pages/myReservations/myReservations",
         "text": "我的",
-        "iconPath": "images/icons/usercenter.png",
-        "selectedIconPath": "images/icons/usercenter-active.png"
+        "iconPath": "images/icons/tab-mine.png",
+        "selectedIconPath": "images/icons/tab-mine-active.png"
       },
       {
         "pagePath": "pages/activities/activities",
         "text": "活动列表",
-        "iconPath": "images/icons/examples.png",
-        "selectedIconPath": "images/icons/examples-active.png"
+        "iconPath": "images/icons/tab-activities.png",
+        "selectedIconPath": "images/icons/tab-activities-active.png"
       }
     ]
   }

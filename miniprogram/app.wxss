@@ -9,6 +9,9 @@ page {
 }
 
 button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: initial;
   border-radius: 0;
   padding: 0;
@@ -18,6 +21,30 @@ button {
 
 button:focus { outline: 0; }
 button::after { border: none; }
+
+.tab,
+.tag,
+.status,
+.status-badge,
+.hero-badge,
+.dispatch-status,
+.pin-badge,
+.rank-badge,
+.admin-badge,
+.empty-icon,
+.input-icon,
+.meta-icon,
+.metric-icon,
+.quick-icon,
+.menu-code,
+.room-status-tag,
+.slot-tag,
+.slot-check,
+.voucher-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .container {
   display: flex;
@@ -58,4 +85,54 @@ button::after { border: none; }
   letter-spacing: 1px;
   padding: 24rpx 28rpx 10rpx;
   text-transform: uppercase;
+}
+
+/* Module header */
+.module-hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 24rpx;
+  padding: 34rpx 28rpx;
+  border-radius: 0 0 14rpx 14rpx;
+  background: linear-gradient(145deg, #0b1f4d 0%, #123c7c 66%, #0f766e 120%);
+  color: #fff;
+}
+
+.module-hero::after {
+  content: '';
+  position: absolute;
+  right: -90rpx;
+  top: -120rpx;
+  width: 260rpx;
+  height: 260rpx;
+  border: 2rpx solid rgba(56, 189, 248, 0.22);
+  border-radius: 50%;
+}
+
+.module-kicker {
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-size: 22rpx;
+  color: rgba(219, 234, 254, 0.76);
+}
+
+.module-title {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 8rpx;
+  font-size: 40rpx;
+  line-height: 1.12;
+  font-weight: 800;
+  color: #fff;
+}
+
+.module-desc {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: rgba(219, 234, 254, 0.78);
 }

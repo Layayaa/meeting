@@ -1,5 +1,11 @@
 <!-- pages/activityManage/activityManage.wxml -->
 <view class="page">
+  <view class="module-hero">
+    <text class="module-kicker">活动信息发布</text>
+    <text class="module-title">活动管理</text>
+    <text class="module-desc">统一维护活动信息、时间和二维码入口</text>
+  </view>
+
   <!-- Form Card -->
   <view class="section-title-row">
     <text class="section-title">{{editingId ? '编辑活动' : '发布活动'}}</text>
@@ -20,7 +26,7 @@
     <view class="input-group">
       <text class="input-label">飞书二维码链接</text>
       <input class="input" data-key="qr_code_url" value="{{qr_code_url}}" bindinput="bindValue" placeholder="输入链接或下方上传图片" />
-      <button class="upload-btn" bindtap="chooseQrImage">📷 上传二维码图片</button>
+      <button class="upload-btn" bindtap="chooseQrImage">上传二维码图片</button>
     </view>
     <button class="save-btn" bindtap="saveActivity">{{editingId ? '保存修改' : '发布活动'}}</button>
   </view>
@@ -32,7 +38,7 @@
   </view>
 
   <view wx:if="{{!activities.length}}" class="empty-state">
-    <text class="empty-icon">🎉</text>
+    <text class="empty-icon">暂无</text>
     <text class="empty-text">暂无活动</text>
   </view>
 
